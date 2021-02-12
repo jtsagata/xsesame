@@ -3,7 +3,6 @@ use std::path::Path;
 use std::collections::HashMap;
 use std::{io, fs};
 use freedesktop_entry_parser::parse_entry;
-use std::ffi::OsStr;
 
 pub struct DesktopInfo {
   path: String,
@@ -18,14 +17,25 @@ impl DesktopInfo {
   pub fn path(&self) -> &str {
     &self.path
   }
-  pub fn desktop(&self) -> &Entry {
-    &self.desktop
-  }
 
   pub fn name(&self) -> &str {
-    let name = self.desktop.section("Desktop Entry").attr("Name");
-    Option::or(name, Some("<None>")).unwrap()
+    self.get_attribute("Name")
   }
+
+  pub fn icon(&self) -> &str {
+    self.get_attribute("Icon")
+  }
+
+  pub fn comment(&self) -> &str {
+    // TODO: Localized
+    self.get_attribute("Comment")
+  }
+
+  fn get_attribute(&self, attr: &str) -> &str {
+    let comment = self.desktop.section("Desktop Entry").attr(attr);
+    Option::or(comment, Some("")).unwrap()
+  }
+
 
   pub fn active_str(&self) -> &str {
     let path = Path::new(self.path());
@@ -35,7 +45,7 @@ impl DesktopInfo {
 
 
   pub fn collect_sessions(sessions: &mut HashMap<String, DesktopInfo>, xsession_dir: &str) -> io::Result<()> {
-    let mut entries = fs::read_dir(xsession_dir)?
+    let mut file_paths = fs::read_dir(xsession_dir)?
       .filter(|entry| {
         match entry {
           Ok(e) => {
@@ -49,18 +59,20 @@ impl DesktopInfo {
       .map(|res| res.map(|e| e.path()))
       .collect::<Result<Vec<_>, io::Error>>()?;
 
-    entries.sort();
+    file_paths.sort();
 
-    for entry in entries {
-      let file_path = entry.to_str().unwrap().to_string();
-      let base_file = entry.with_extension("").to_str().unwrap_or_default().to_owned();
-      let key = base_file.replace(xsession_dir, "");
+    for path in file_paths {
+      let file_path = path.display().to_string();
+      let base_path = path.with_extension("").display().to_string();
+      let map_key = base_path.replace(xsession_dir, "");
 
-      let desktop_file = parse_entry(entry)?;
-      let desktop = DesktopInfo::new(file_path, desktop_file);
-      println!("{} K=> {}", key, desktop.name());
+      // TODO: Demo run a parsing failure case
+      let desktop_entry = parse_entry(path)?;
+      let desktop = DesktopInfo::new(file_path, desktop_entry);
 
-      sessions.entry(key).or_insert(desktop);
+      println!("{}: [{}] '{}' {} -- {}", map_key, desktop.icon(), desktop.name(), desktop.active_str(), desktop.comment());
+
+      sessions.entry(map_key).or_insert(desktop);
     }
 
     Ok(())
