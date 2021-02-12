@@ -39,8 +39,8 @@ impl DesktopInfo {
       .filter(|entry| {
         match entry {
           Ok(e) => {
-            let ee = e.path();
-            let ext = ee.extension().unwrap_or_default();
+            let local = e.path();
+            let ext = local.extension().unwrap_or_default();
             ext == "desktop" || ext == "desktop-disable"
           }
           Err(_) => { false }
@@ -53,11 +53,12 @@ impl DesktopInfo {
 
     for entry in entries {
       let file_path = entry.to_str().unwrap().to_string();
-      let key = entry.file_name().unwrap_or_default().to_str().unwrap_or_default().to_owned();
+      let base_file = entry.with_extension("").to_str().unwrap_or_default().to_owned();
+      let key = base_file.replace(xsession_dir, "");
 
       let desktop_file = parse_entry(entry)?;
       let desktop = DesktopInfo::new(file_path, desktop_file);
-      println!("{}", desktop.name());
+      println!("{} K=> {}", key, desktop.name());
 
       sessions.entry(key).or_insert(desktop);
     }
