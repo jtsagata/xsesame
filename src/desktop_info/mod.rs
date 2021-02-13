@@ -39,12 +39,14 @@ impl DesktopInfo {
     self.path.to_string()
   }
 
-  pub fn name(&self) -> String {
-    self.get_attribute_str("Name")
+  pub fn path_key(&self) -> String {
+    let path = Path::new(&self.path).with_extension("");
+    let res = path.file_name().unwrap();
+    res.to_str().unwrap().to_string()
   }
 
-  pub fn icon(&self) -> String {
-    self.get_attribute_str("Icon")
+  pub fn name(&self) -> String {
+    self.get_attribute_str("Name")
   }
 
   pub fn comment(&self) -> String {
@@ -86,10 +88,10 @@ impl DesktopInfo {
     Option::or(self.get_attribute(&attr), Some("")).unwrap().to_string()
   }
 
-  pub fn active_str(&self) -> &str {
+  pub fn is_active(&self) -> bool {
     let path = Path::new(&self.path);
     let ext = path.extension().unwrap();
-    if ext == "desktop" { "(active)" } else { "(inactive)" }
+    ext == "desktop"
   }
 
 
@@ -121,8 +123,6 @@ impl DesktopInfo {
           let desktop = DesktopInfo::new(file_path, desktop_entry);
           match desktop {
             Ok(desktop) => {
-              // TODO: Remove this
-              println!("{}: [{}] '{}' {} -- {}", map_key, desktop.icon(), desktop.name(), desktop.active_str(), desktop.comment());
               sessions.entry(map_key).or_insert(desktop);
             }
             Err(error) => {
