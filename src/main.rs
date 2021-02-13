@@ -4,7 +4,9 @@ use std::io;
 use crate::desktop_info::{DesktopInfo};
 use std::collections::HashMap;
 
-const XSESSION_DIR: &str = "/usr/share/xsessions/";
+// TODO: From cargo?
+// const XSESSION_DIR: &str = "/usr/share/xsessions/";
+const XSESSION_DIR: &str = "/home/talos/CLionProjects/Rust/sesman/test/samples";
 
 fn main() -> io::Result<()> {
   let mut sessions = HashMap::<String, DesktopInfo>::new();

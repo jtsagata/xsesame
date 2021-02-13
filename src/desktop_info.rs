@@ -11,6 +11,7 @@ pub struct DesktopInfo {
 
 impl DesktopInfo {
   pub fn new(path: String, desktop: Entry) -> Self {
+    // TODO: check if provides the filed we need and maybe return an Optional
     DesktopInfo { path, desktop }
   }
 
@@ -66,13 +67,18 @@ impl DesktopInfo {
       let base_path = path.with_extension("").display().to_string();
       let map_key = base_path.replace(xsession_dir, "");
 
-      // TODO: Demo run a parsing failure case
-      let desktop_entry = parse_entry(path)?;
-      let desktop = DesktopInfo::new(file_path, desktop_entry);
-
-      println!("{}: [{}] '{}' {} -- {}", map_key, desktop.icon(), desktop.name(), desktop.active_str(), desktop.comment());
-
-      sessions.entry(map_key).or_insert(desktop);
+      let desktop_entry = parse_entry(path);
+      match desktop_entry {
+        Ok(desktop_entry) => {
+          let desktop = DesktopInfo::new(file_path, desktop_entry);
+          println!("{}: [{}] '{}' {} -- {}", map_key, desktop.icon(), desktop.name(), desktop.active_str(), desktop.comment());
+          sessions.entry(map_key).or_insert(desktop);
+        }
+        Err(_) => {
+          // TODO: To error stream
+          println!("*** Error: Unable to parse {}", file_path);
+        }
+      }
     }
 
     Ok(())
