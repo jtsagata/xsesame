@@ -1,7 +1,0 @@
-[Desktop Entry]
-# TODO: change it to readonly somehow
-Name=LXDE (readonly)
-Comment=LXDE - Lightweight X11 desktop environment
-Exec=/usr/bin/startlxde
-# Icon=
-Type=Application

@@ -8,7 +8,7 @@ use std::path::Path;
 use std::ffi::OsStr;
 use colored::*;
 
-// TODO: From cargo?
+// TODO: From cargo? or from command line arguments :-) -- solved
 // const XSESSION_DIR: &str = "/usr/share/xsessions/";
 const XSESSION_DIR: &str = "/home/talos/CLionProjects/Rust/sesman/test/samples";
 
