@@ -10,9 +10,9 @@ pub struct DesktopInfo {
 }
 
 impl DesktopInfo {
-  pub fn new(path: String, desktop: Entry) -> Result<Self,String> {
+  pub fn new(path: String, desktop: Entry) -> Result<Self, String> {
     let path_copy = path.clone();
-    let entry = DesktopInfo{ path, desktop };
+    let entry = DesktopInfo { path, desktop };
 
     // Test Type="Application"
     let d_type = entry.get_attribute("Type");
@@ -33,33 +33,47 @@ impl DesktopInfo {
     Ok(entry)
   }
 
-  pub fn path(&self) -> &str {
-    &self.path
+  pub fn path(&self) -> String {
+    self.path.to_string()
   }
 
-  pub fn name(&self) -> &str {
+  pub fn name(&self) -> String {
     self.get_attribute_str("Name")
   }
 
-  pub fn icon(&self) -> &str {
+  pub fn icon(&self) -> String {
     self.get_attribute_str("Icon")
   }
 
-  pub fn comment(&self) -> &str {
-    // TODO: Localized
-    self.get_attribute_str("Comment")
+  pub fn comment(&self) -> String {
+    let localized = self.get_attribute_with_locale("Comment", "el");
+    match localized {
+      None => { self.get_attribute_str("Comment") }
+      Some(text) => { text }
+    }
   }
 
-  pub fn get_attribute(&self, attr: &str) -> Option<&str>{
+  fn get_attribute(&self, attr: &str) -> Option<&str> {
     return self.desktop.section("Desktop Entry").attr(attr);
   }
 
-  pub fn get_attribute_str(&self, attr: &str) -> &str {
-    Option::or(self.get_attribute(&attr), Some("")).unwrap()
+  fn get_attribute_with_locale(&self, attr: &str, locale: &str) -> Option<String> {
+    let section = self.desktop.section("Desktop Entry");
+    let localized = section.attr_with_param(attr, locale);
+    match localized {
+      None => { None }
+      Some(txt) => {
+        Some(txt.to_string())
+      }
+    }
+  }
+
+  fn get_attribute_str(&self, attr: &str) -> String {
+    Option::or(self.get_attribute(&attr), Some("")).unwrap().to_string()
   }
 
   pub fn active_str(&self) -> &str {
-    let path = Path::new(self.path());
+    let path = Path::new(&self.path);
     let ext = path.extension().unwrap();
     if ext == "desktop" { "(active)" } else { "(inactive)" }
   }
@@ -93,6 +107,7 @@ impl DesktopInfo {
           let desktop = DesktopInfo::new(file_path, desktop_entry);
           match desktop {
             Ok(desktop) => {
+              // TODO: Remove this
               println!("{}: [{}] '{}' {} -- {}", map_key, desktop.icon(), desktop.name(), desktop.active_str(), desktop.comment());
               sessions.entry(map_key).or_insert(desktop);
             }
