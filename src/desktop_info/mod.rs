@@ -3,6 +3,7 @@ use std::path::Path;
 use std::collections::HashMap;
 use std::{io, fs};
 use freedesktop_entry_parser::parse_entry;
+use colored::*;
 
 pub struct DesktopInfo {
   path: String,
@@ -12,22 +13,23 @@ pub struct DesktopInfo {
 impl DesktopInfo {
   pub fn new(path: String, desktop: Entry) -> Result<Self, String> {
     let path_copy = path.clone();
+    let just_the_file = Path::new(&path_copy).file_name().unwrap().to_string_lossy();
     let entry = DesktopInfo { path, desktop };
 
     // Test Type="Application"
     let d_type = entry.get_attribute("Type");
     match d_type {
       None => {
-        return Err(format!("The file {} does not specify a type", path_copy));
+        return Err(format!("The file '{}' does not specify a {}.", just_the_file.green(), "Type".bold()));
       }
       Some(d_type) => if d_type != "Application" {
-        return Err(format!("The file {} specify type as '{}'", path_copy, d_type));
+        return Err(format!("The file '{}' specify {} as '{}'.", just_the_file.green(), "Type".bold(), d_type.green()));
       },
     }
 
     // Test if provides a Name
     if entry.get_attribute("Name").is_none() {
-      return Err(format!("The file {} does not specify a name", path_copy));
+      return Err(format!("The file '{}' does not specify a {}.", just_the_file.green(), "Name".bold()));
     }
 
     Ok(entry)
@@ -99,7 +101,7 @@ impl DesktopInfo {
     for path in file_paths {
       let file_path = path.display().to_string();
       let base_path = path.with_extension("").display().to_string();
-      let map_key = base_path.replace(xsession_dir, "");
+      let map_key = base_path.replace(xsession_dir, "").replace("/", "");
 
       let desktop_entry = parse_entry(path);
       match desktop_entry {
@@ -112,13 +114,13 @@ impl DesktopInfo {
               sessions.entry(map_key).or_insert(desktop);
             }
             Err(error) => {
-              println!("*** ERROR {}", error)
+              println!("{} {}", "Error:".red(), error)
             }
           }
         }
         Err(_) => {
-          // TODO: To error stream
-          println!("*** Error: Unable to parse {}", file_path);
+          let just_the_file = Path::new(&file_path).file_name().unwrap().to_string_lossy();
+          eprintln!("{} Unable to parse '{}'.", "Error:".red(), just_the_file.green());
         }
       }
     }

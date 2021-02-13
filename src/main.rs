@@ -15,7 +15,5 @@ fn main() -> io::Result<()> {
     panic!("Unable to parse sessions");
   }
 
-  // TODO: Print sessions as table
-
   Ok(())
 }
