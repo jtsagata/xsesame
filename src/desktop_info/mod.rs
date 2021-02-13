@@ -48,11 +48,23 @@ impl DesktopInfo {
   }
 
   pub fn comment(&self) -> String {
-    let localized = self.get_attribute_with_locale("Comment", "el");
-    match localized {
-      None => { self.get_attribute_str("Comment") }
-      Some(text) => { text }
+    let mut lang_env = std::env::var("LC_ALL");
+    if lang_env.is_err() {
+      lang_env = std::env::var("LANG");
     }
+    return match lang_env {
+      Ok(lang_env) => {
+        let lang = env_lang::to_struct(&lang_env).unwrap().language.unwrap();
+        let localized = self.get_attribute_with_locale("Comment", lang);
+        match localized {
+          None => { self.get_attribute_str("Comment") }
+          Some(text) => { text }
+        }
+      }
+      Err(_) => {
+        self.get_attribute_str("Comment")
+      }
+    };
   }
 
   fn get_attribute(&self, attr: &str) -> Option<&str> {
