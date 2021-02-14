@@ -1,13 +1,10 @@
 mod desktop_info;
 mod opts;
 
-// use crate::desktop_info::DesktopInfo;
 use stybulate::{Table, Style, Headers, Cell};
 use desktop_info::DesktopInfo;
 use std::collections::HashMap;
 use std::path::Path;
-use std::ffi::OsStr;
-use clap::{Shell};
 use colored::*;
 use std::io;
 
@@ -22,6 +19,8 @@ fn main() {
     panic!(format!("{}: is not a directory", xsession_dir));
   }
 
+  let mut sub_command: bool = false;
+
   if let Some(matches) = matches.subcommand_matches("list") {
     let style = matches.value_of("style").unwrap_or("Fancy");
     let style = match style {
@@ -31,18 +30,38 @@ fn main() {
       &_ => { Style::Plain }
     };
     cmd_list_sessions(xsession_dir, style);
+    sub_command = true;
   }
 
   if let Some(matches) = matches.subcommand_matches("completion") {
+    use clap::Shell;
+
     let shell = matches.value_of("shell").unwrap_or("bash");
-    let shell = match shell
-    {
+    let shell = match shell {
       "zsh" => { Shell::Zsh }
       "fish" => { Shell::Fish }
       "elvish" => { Shell::Elvish }
       &_ => { Shell::Bash }
     };
     opts::build_cli().gen_completions_to("xsesame", shell, &mut io::stdout());
+    sub_command = true;
+  }
+
+  // If no subcommand is given rerun with list option
+  if !sub_command {
+    use exec::Error;
+    use std::ffi::OsStr;
+
+    let exe = std::env::current_exe().unwrap().display().to_string();
+    let err = exec::Command::new(OsStr::new(&exe)).arg("list").exec();
+    match err {
+      Error::BadArgument(_) => {}
+      Error::Errno(errno) => {
+        println!("Error: {}", err);
+        use std::process;
+        process::exit(errno.0);
+      }
+    }
   }
 }
 
@@ -75,6 +94,8 @@ fn cmd_list_sessions(xsession_dir: &str, style: stybulate::Style) {
 }
 
 fn program_name() -> Option<String> {
+  use std::ffi::OsStr;
+
   std::env::current_exe().ok()
     .as_ref()
     .map(Path::new)
@@ -82,6 +103,7 @@ fn program_name() -> Option<String> {
     .and_then(OsStr::to_str)
     .map(String::from)
 }
+
 
 #[cfg(not(target_os = "linux"))]
 pub fn main() {
