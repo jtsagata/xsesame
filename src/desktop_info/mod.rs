@@ -1,5 +1,6 @@
+use fs::read_dir;
 use std::{fs, io};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::path::Path;
 
 use colored::*;
@@ -106,8 +107,8 @@ impl DesktopInfo {
   }
 
   /// Collect and return all sessions
-  pub fn collect_sessions(sessions: &mut HashMap<String, DesktopInfo>, xsession_dir: &str) -> io::Result<()> {
-    let mut file_paths = fs::read_dir(xsession_dir)?
+  pub fn collect_sessions(sessions: &mut BTreeMap<String, DesktopInfo>, xsession_dir: &str) -> io::Result<()> {
+    let mut file_paths = read_dir(xsession_dir)?
       .filter(|entry| {
         match entry {
           Ok(e) => {

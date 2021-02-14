@@ -7,7 +7,7 @@
 //!
 
 use std::{io, process};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use clap::{ArgMatches, Shell};
@@ -44,10 +44,9 @@ fn main() {
   }
 
   if let Some(matches) = matches.subcommand_matches("disable") {
-    cmd_enable_disable(xsession_dir, matches, &"desktop");
+    cmd_enable_disable(xsession_dir, matches, &"desktop-disable");
     sub_command = true;
   }
-
 
   if let Some(matches) = matches.subcommand_matches("completion") {
     cmd_completion(matches);
@@ -56,7 +55,7 @@ fn main() {
 
   // If no subcommand is given rerun with list option
   if !sub_command {
-    cmd_rerun_with_list_cmd()
+    cmd_rerun_with_list_cmd(xsession_dir)
   }
 }
 
@@ -77,9 +76,11 @@ fn cmd_enable_disable(xsession_dir: &str, matches: &ArgMatches, ext: &str) {
   let file = file.unwrap();
   let orig_name = file.clone();
   let new_name = file.with_extension(ext);
+
   if orig_name == new_name {
     let state = if ext == "desktop" { "enabled" } else { "disabled" };
     eprintln!("Nothing to be done, '{}' is {}.", key.green(), state.green());
+    return;
   }
 
   let done = std::fs::rename(&orig_name, &new_name);
@@ -120,12 +121,15 @@ fn cmd_completion(matches: &ArgMatches) {
 /// Rerun current executable using list subcommand
 ///
 /// As clap crate can't support a default subcommand yet, we hack it with execve()
-fn cmd_rerun_with_list_cmd() {
+fn cmd_rerun_with_list_cmd(xsession_dir: &str) {
   use exec::Error;
   use std::ffi::OsStr;
 
   let exe = std::env::current_exe().unwrap().display().to_string();
-  let err = exec::Command::new(OsStr::new(&exe)).arg("list").exec();
+  let err = exec::Command::new(OsStr::new(&exe))
+    .arg("--session-dir")
+    .arg(xsession_dir)
+    .arg("list").exec();
   match err {
     Error::BadArgument(_) => {}
     Error::Errno(errno) => {
@@ -161,8 +165,8 @@ fn print_sessions(xsession_dir: &str, style: stybulate::Style) {
 }
 
 /// Get all sessions in directory
-fn get_sessions(xsession_dir: &str) -> HashMap<String, DesktopInfo> {
-  let mut sessions = HashMap::<String, DesktopInfo>::new();
+fn get_sessions(xsession_dir: &str) -> BTreeMap<String, DesktopInfo> {
+  let mut sessions = BTreeMap::<String, DesktopInfo>::new();
 
   if DesktopInfo::collect_sessions(&mut sessions, &xsession_dir).is_err() {
     println!("{} Unable to parse sessions", "Error:".red());
