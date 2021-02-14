@@ -1,9 +1,10 @@
-use freedesktop_entry_parser::Entry;
-use std::path::Path;
+use std::{fs, io};
 use std::collections::HashMap;
-use std::{io, fs};
-use freedesktop_entry_parser::parse_entry;
+use std::path::Path;
+
 use colored::*;
+use freedesktop_entry_parser::Entry;
+use freedesktop_entry_parser::parse_entry;
 
 pub struct DesktopInfo {
   path: String,
@@ -126,13 +127,13 @@ impl DesktopInfo {
               sessions.entry(map_key).or_insert(desktop);
             }
             Err(error) => {
-              println!("{} {}", "Error:".red(), error)
+              println!("{} {}", "Warning:".yellow(), error)
             }
           }
         }
         Err(_) => {
           let just_the_file = Path::new(&file_path).file_name().unwrap().to_string_lossy();
-          eprintln!("{} Unable to parse '{}'.", "Error:".red(), just_the_file.green());
+          eprintln!("{} Unable to parse '{}'.", "Warning:".yellow(), just_the_file.green());
         }
       }
     }

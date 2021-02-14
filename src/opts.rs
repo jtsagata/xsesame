@@ -1,4 +1,4 @@
-use clap::{SubCommand, Arg, crate_authors, crate_version, AppSettings, App};
+use clap::{App, AppSettings, Arg, crate_authors, crate_version, SubCommand};
 
 pub const XSESSION_DIR: &str = "/usr/share/xsessions";
 
@@ -27,8 +27,6 @@ The propose of this little tool is to minimize the clutter in the display manage
       .long("session-dir").short("d")
       .value_name("XSESSION_DIR").takes_value(true)
       .default_value(XSESSION_DIR)
-      .require_equals(true)
-      .hide_default_value(true)
       .global(true)
       .help("Session config directory")
     )
@@ -42,6 +40,7 @@ The propose of this little tool is to minimize the clutter in the display manage
     .subcommand(
       SubCommand::with_name("completion")
         .about("Generate completions for various shells")
+        .setting(AppSettings::ColoredHelp)
         .arg(Arg::with_name("shell")
           .require_equals(true)
           .possible_values(&["bash", "zsh", "fish", "elvish"])
@@ -53,8 +52,33 @@ The propose of this little tool is to minimize the clutter in the display manage
     )
 
     .subcommand(
+      SubCommand::with_name("enable")
+        .about("Enable a session name")
+        .setting(AppSettings::ColoredHelp)
+        .arg(Arg::with_name("session_key")
+          .required(true)
+          .takes_value(true).value_name("session key")
+          .hide_default_value(true)
+          .help("Enable a session using a key from list (for example cinnamon2d)")
+        )
+    )
+
+    .subcommand(
+      SubCommand::with_name("disable")
+        .about("Disable a session name")
+        .setting(AppSettings::ColoredHelp)
+        .arg(Arg::with_name("session_key")
+          .required(true)
+          .takes_value(true).value_name("session key")
+          .hide_default_value(true)
+          .help("Disable a session using a key from list (for example cinnamon2d)")
+        )
+    )
+
+    .subcommand(
       SubCommand::with_name("list")
         .about("list display manager sessions")
+        .setting(AppSettings::ColoredHelp)
         .long_about(help_start)
         .display_order(1)
         .arg(Arg::with_name("style")
