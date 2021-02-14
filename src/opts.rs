@@ -1,8 +1,9 @@
-use clap::{App, AppSettings, Arg, crate_authors, crate_version, SubCommand};
+use clap::{App, AppSettings, Arg, crate_version, SubCommand};
 
+/// The default place of session data
 pub const XSESSION_DIR: &str = "/usr/share/xsessions";
 
-
+/// Generate the command line argument structure
 pub fn build_cli() -> App<'static, 'static> {
   let help_start = "\nSome desktop environments install a lot of different types that have to real use for
 the end user. For example cinnamon also install a cinnamon fallback. Others install a lot more.
@@ -12,7 +13,7 @@ The propose of this little tool is to minimize the clutter in the display manage
 
   App::new("xsesame")
     .version(crate_version!())
-    .author(crate_authors!("\n"))
+    // .author(crate_authors!("\n"))
     .about("Manage display manager sessions. Allow to list, enable and disable them")
     .after_help("Use help <subcommand> for more info.")
     .long_about(help_start)

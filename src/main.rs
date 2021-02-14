@@ -1,3 +1,11 @@
+//! xsessame
+//! Some desktop environments install a lot of different types that have to real use for
+//! the end user. For example cinnamon also install a cinnamon fallback. Others install a lot more.
+//! This small utility helps you to list and disable some of them. Of course you can also re-enable them.
+//!
+//! The propose of this little tool is to minimize the clutter in the display manager.
+//!
+
 use std::{io, process};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -52,6 +60,7 @@ fn main() {
   }
 }
 
+/// This enables or disable a session given a key
 fn cmd_enable_disable(xsession_dir: &str, matches: &ArgMatches, ext: &str) {
   let key = matches.value_of("session_key").unwrap();
   let file = get_filename_from_key(&xsession_dir, &key);
@@ -84,6 +93,7 @@ fn cmd_enable_disable(xsession_dir: &str, matches: &ArgMatches, ext: &str) {
   }
 }
 
+/// List sessions action
 fn cmd_list_sessions(xsession_dir: &str, matches: &ArgMatches) {
   let style = matches.value_of("style").unwrap_or("Fancy");
   let style = match style {
@@ -95,6 +105,7 @@ fn cmd_list_sessions(xsession_dir: &str, matches: &ArgMatches) {
   print_sessions(xsession_dir, style);
 }
 
+/// Command line completion generation
 fn cmd_completion(matches: &ArgMatches) {
   let shell = matches.value_of("shell").unwrap_or("bash");
   let shell = match shell {
@@ -106,6 +117,9 @@ fn cmd_completion(matches: &ArgMatches) {
   opts::build_cli().gen_completions_to("xsesame", shell, &mut io::stdout());
 }
 
+/// Rerun current executable using list subcommand
+///
+/// As clap crate can't support a default subcommand yet, we hack it with execve()
 fn cmd_rerun_with_list_cmd() {
   use exec::Error;
   use std::ffi::OsStr;
@@ -121,6 +135,7 @@ fn cmd_rerun_with_list_cmd() {
   }
 }
 
+/// Print sessions with style
 fn print_sessions(xsession_dir: &str, style: stybulate::Style) {
   let sessions = get_sessions(&xsession_dir);
 
@@ -145,6 +160,7 @@ fn print_sessions(xsession_dir: &str, style: stybulate::Style) {
   println!();
 }
 
+/// Get all sessions in directory
 fn get_sessions(xsession_dir: &str) -> HashMap<String, DesktopInfo> {
   let mut sessions = HashMap::<String, DesktopInfo>::new();
 
@@ -156,6 +172,7 @@ fn get_sessions(xsession_dir: &str) -> HashMap<String, DesktopInfo> {
   sessions
 }
 
+/// Helper to get a PathBuf pointing to the session file
 fn get_filename_from_key(xsession_dir: &str, key: &str) -> Result<PathBuf, String> {
   let sessions = get_sessions(xsession_dir);
 
@@ -174,6 +191,7 @@ fn get_filename_from_key(xsession_dir: &str, key: &str) -> Result<PathBuf, Strin
   Ok(orig)
 }
 
+/// Helper to get the executable name without the path
 fn program_name() -> Option<String> {
   use std::ffi::OsStr;
 

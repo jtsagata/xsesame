@@ -6,12 +6,14 @@ use colored::*;
 use freedesktop_entry_parser::Entry;
 use freedesktop_entry_parser::parse_entry;
 
+/// A path to a session file, and a parser to it
 pub struct DesktopInfo {
   path: String,
   desktop: freedesktop_entry_parser::Entry,
 }
 
 impl DesktopInfo {
+  /// Create a new DesktopInfo object and validate some basic properties
   pub fn new(path: String, desktop: Entry) -> Result<Self, String> {
     let path_copy = path.clone();
     let just_the_file = Path::new(&path_copy).file_name().unwrap().to_string_lossy();
@@ -36,20 +38,24 @@ impl DesktopInfo {
     Ok(entry)
   }
 
+  /// Export the path
   pub fn path(&self) -> String {
     self.path.to_string()
   }
 
+  /// Get the path key from filename
   pub fn path_key(&self) -> String {
     let path = Path::new(&self.path).with_extension("");
     let res = path.file_name().unwrap();
     res.to_str().unwrap().to_string()
   }
 
+  /// Get the session name
   pub fn name(&self) -> String {
     self.get_attribute_str("Name")
   }
 
+  /// Get the session comment in native language if available, fallbacks to English
   pub fn comment(&self) -> String {
     let mut lang_env = std::env::var("LC_ALL");
     if lang_env.is_err() {
@@ -70,10 +76,12 @@ impl DesktopInfo {
     };
   }
 
+  /// Helper to get an attribute
   fn get_attribute(&self, attr: &str) -> Option<&str> {
     return self.desktop.section("Desktop Entry").attr(attr);
   }
 
+  /// Helper to get an attribute localized
   fn get_attribute_with_locale(&self, attr: &str, locale: &str) -> Option<String> {
     let section = self.desktop.section("Desktop Entry");
     let localized = section.attr_with_param(attr, locale);
@@ -85,17 +93,19 @@ impl DesktopInfo {
     }
   }
 
+  /// Helper to get an attribute as string
   fn get_attribute_str(&self, attr: &str) -> String {
     Option::or(self.get_attribute(&attr), Some("")).unwrap().to_string()
   }
 
+  /// Get the session state (active/inactive) from filename
   pub fn is_active(&self) -> bool {
     let path = Path::new(&self.path);
     let ext = path.extension().unwrap();
     ext == "desktop"
   }
 
-
+  /// Collect and return all sessions
   pub fn collect_sessions(sessions: &mut HashMap<String, DesktopInfo>, xsession_dir: &str) -> io::Result<()> {
     let mut file_paths = fs::read_dir(xsession_dir)?
       .filter(|entry| {
