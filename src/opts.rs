@@ -39,7 +39,7 @@ The propose of this little tool is to minimize the clutter in the display manage
         .about("Export session list")
         .setting(AppSettings::ColoredHelp)
         .after_help("For use with integration with guis")
-        .setting(AppSettings::Hidden)
+        .display_order(4)
     )
 
     .subcommand(
@@ -56,28 +56,16 @@ The propose of this little tool is to minimize the clutter in the display manage
         )
     )
 
-    .subcommand(
-      SubCommand::with_name("enable")
-        .about("Enable a session name")
-        .setting(AppSettings::ColoredHelp)
-        .arg(Arg::with_name("session_key")
-          .required(true)
-          .takes_value(true).value_name("session key")
-          .hide_default_value(true)
-          .help("Enable a session using a key from list (for example cinnamon2d)")
-        )
+    .subcommand(build_enable_disable_cli(
+      "enable",
+      "Enable a session using a key from list (for example cinnamon2d)")
+      .display_order(2)
     )
 
-    .subcommand(
-      SubCommand::with_name("disable")
-        .about("Disable a session name")
-        .setting(AppSettings::ColoredHelp)
-        .arg(Arg::with_name("session_key")
-          .required(true)
-          .takes_value(true).value_name("session key")
-          .hide_default_value(true)
-          .help("Disable a session using a key from list (for example cinnamon2d)")
-        )
+    .subcommand(build_enable_disable_cli(
+      "disable",
+      "Disable a session using a key from list (for example cinnamon2d)")
+      .display_order(3)
     )
 
     .subcommand(
@@ -118,5 +106,17 @@ The propose of this little tool is to minimize the clutter in the display manage
           .next_line_help(true)
           .display_order(2)
         )
+    )
+}
+
+pub fn build_enable_disable_cli(name: &str, description: &'static str) -> App<'static, 'static> {
+  SubCommand::with_name(name)
+    .about("Disable a session name")
+    .setting(AppSettings::ColoredHelp)
+    .arg(Arg::with_name("session_key")
+      .required(true)
+      .takes_value(true).value_name("session key")
+      .hide_default_value(true)
+      .help(description)
     )
 }
