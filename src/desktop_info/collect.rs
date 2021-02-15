@@ -31,7 +31,7 @@ pub fn collect_sessions(sessions: &mut BTreeMap<String, DesktopInfo>, xsession_d
           }
           Err(error) => {
             // The parsing was ok but some key elements is missing
-            println!("{} {}", "Warning:".yellow(), error)
+            eprintln!("{} {}", "Warning:".yellow(), error)
           }
         }
       }

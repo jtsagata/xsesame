@@ -28,7 +28,7 @@ fn main() {
   // Sessions directory
   let xsession_dir = matches.value_of("session-dir").unwrap_or(opts::XSESSION_DIR);
   if !Path::new(xsession_dir).is_dir() {
-    println!("{} '{}' is not a directory", "Error:".red(), xsession_dir.green());
+    eprintln!("{} '{}' is not a directory", "Error:".red(), xsession_dir.green());
     process::exit(-1);
   }
 
@@ -66,8 +66,9 @@ fn main() {
   }
 
   if let Some(_matches) = matches.subcommand_matches("export") {
-    // sub_command = true;
-    todo!();
+    let json = desktop_info::to_json::export(xsession_dir);
+    println!("{}", json);
+    sub_command = true;
   }
 
   // If no subcommand is given rerun with list option
@@ -125,6 +126,9 @@ fn cmd_list_sessions(xsession_dir: &str, matches: &ArgMatches) {
   let use_nls = matches.is_present("nls");
   let use_emoji = matches.is_present("emoji");
 
+  let sessions = get_sessions(&xsession_dir);
+
+
   let style = match style {
     "Fancy" => { Style::Fancy }
     "Grid" => { Style::Grid }
@@ -132,7 +136,6 @@ fn cmd_list_sessions(xsession_dir: &str, matches: &ArgMatches) {
     &_ => { Style::Plain }
   };
 
-  let sessions = get_sessions(&xsession_dir);
   let mut elements: Vec<Vec<Cell>> = Vec::new();
   for (_, el) in sessions {
 
@@ -199,7 +202,7 @@ fn get_sessions(xsession_dir: &str) -> BTreeMap<String, DesktopInfo> {
   let mut sessions = BTreeMap::<String, DesktopInfo>::new();
 
   if collect_sessions(&mut sessions, &xsession_dir).is_err() {
-    println!("{} Unable to parse sessions", "Error:".red());
+    eprintln!("{} Unable to parse sessions", "Error:".red());
     process::exit(-1);
   }
 

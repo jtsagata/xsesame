@@ -4,6 +4,7 @@ use colored::*;
 use freedesktop_entry_parser::Entry;
 
 pub mod collect;
+pub mod to_json;
 
 /// A path to a session file, and a parser to it
 pub struct DesktopInfo {
@@ -54,6 +55,11 @@ impl DesktopInfo {
     self.get_attribute_str("Name")
   }
 
+  /// Get the session icon (if any)
+  pub fn icon(&self) -> String {
+    self.get_attribute_str("Icon")
+  }
+
   /// Get the session comment in native language if available, fallbacks to English
   pub fn comment_with_nls(&self) -> String {
     let mut lang_env = std::env::var("LC_ALL");
@@ -77,9 +83,8 @@ impl DesktopInfo {
 
   /// Get the session comment
   pub fn comment(&self) -> String {
-        self.get_attribute_str("Comment")
+    self.get_attribute_str("Comment")
   }
-
 
 
   /// Helper to get an attribute
@@ -111,3 +116,4 @@ impl DesktopInfo {
     ext == "desktop"
   }
 }
+
