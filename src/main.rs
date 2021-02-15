@@ -15,6 +15,7 @@ use colored::*;
 use nix::unistd::Uid;
 use stybulate::{Cell, Headers, Style, Table};
 
+use desktop_info::collect::collect_sessions;
 use desktop_info::DesktopInfo;
 
 mod desktop_info;
@@ -50,6 +51,12 @@ fn main() {
 
   if let Some(matches) = matches.subcommand_matches("completion") {
     cmd_completion(matches);
+    sub_command = true;
+  }
+
+  if let Some(matches) = matches.subcommand_matches("export") {
+    //TODO:
+    println!("TODO: export");
     sub_command = true;
   }
 
@@ -168,7 +175,7 @@ fn print_sessions(xsession_dir: &str, style: stybulate::Style) {
 fn get_sessions(xsession_dir: &str) -> BTreeMap<String, DesktopInfo> {
   let mut sessions = BTreeMap::<String, DesktopInfo>::new();
 
-  if DesktopInfo::collect_sessions(&mut sessions, &xsession_dir).is_err() {
+  if collect_sessions(&mut sessions, &xsession_dir).is_err() {
     println!("{} Unable to parse sessions", "Error:".red());
     process::exit(-1);
   }
