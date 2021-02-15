@@ -194,8 +194,6 @@ fn cmd_rerun_with_list_cmd(xsession_dir: &str) {
   }
 }
 
-
-
 /// Helper to get a PathBuf pointing to the session file
 fn get_filename_from_key(xsession_dir: &str, key: &str) -> Result<PathBuf, String> {
   let sessions = get_sessions(xsession_dir);

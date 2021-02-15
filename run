@@ -1,7 +1,7 @@
 #!/bin/bash
 # Don't mess with system files
 
-rm ./target/debug/xsesame
+rm ./target/debug/xsesame-cli
 cargo build
 
 LC_ALL=el_GR.utf8 ./target/debug/xsesame-cli --session-dir test/samples "$@"
