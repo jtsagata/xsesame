@@ -119,4 +119,8 @@ pub fn build_enable_disable_cli(name: &str, description: &'static str) -> App<'s
       .hide_default_value(true)
       .help(description)
     )
+    .arg(Arg::with_name("no-journald")
+      .long("no-journal").short("J")
+      .help("Disable logging to journal")
+    )
 }

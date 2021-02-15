@@ -1,5 +1,6 @@
 #!/bin/bash
 # Run tests, waiting for a proper test suite
+cargo deps --no-transitive-deps  | dot -Tpng > graph.png
 
 rm ./target/debug/xsesame
 cargo build
