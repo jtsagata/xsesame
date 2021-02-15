@@ -7,7 +7,6 @@
 //!
 
 use std::{io, process};
-use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use clap::{ArgMatches, Shell};
@@ -15,10 +14,8 @@ use colored::*;
 use nix::unistd::Uid;
 use stybulate::{Cell, Headers, Style, Table};
 
-use desktop_info::collect::collect_sessions;
-use desktop_info::DesktopInfo;
+use xsesame_core::collect::get_sessions;
 
-mod desktop_info;
 mod opts;
 
 #[cfg(target_os = "linux")]
@@ -66,7 +63,7 @@ fn main() {
   }
 
   if let Some(_matches) = matches.subcommand_matches("export") {
-    let json = desktop_info::to_json::export(xsession_dir);
+    let json = export_json(xsession_dir);
     println!("{}", json);
     sub_command = true;
   }
@@ -197,17 +194,7 @@ fn cmd_rerun_with_list_cmd(xsession_dir: &str) {
   }
 }
 
-/// Get all sessions in directory
-fn get_sessions(xsession_dir: &str) -> BTreeMap<String, DesktopInfo> {
-  let mut sessions = BTreeMap::<String, DesktopInfo>::new();
 
-  if collect_sessions(&mut sessions, &xsession_dir).is_err() {
-    eprintln!("{} Unable to parse sessions", "Error:".red());
-    process::exit(-1);
-  }
-
-  sessions
-}
 
 /// Helper to get a PathBuf pointing to the session file
 fn get_filename_from_key(xsession_dir: &str, key: &str) -> Result<PathBuf, String> {
@@ -238,6 +225,12 @@ fn program_name() -> Option<String> {
     .and_then(Path::file_name)
     .and_then(OsStr::to_str)
     .map(String::from)
+}
+
+/// Export sessions as json
+pub fn export_json(xsession_dir: &str) -> String {
+  let sessions = get_sessions(&xsession_dir);
+  serde_json::to_string(&sessions).unwrap()
 }
 
 

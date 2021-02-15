@@ -1,20 +1,5 @@
-[package]
-name = "xsesame"
-version = "0.1.0"
-authors = ["Giannis Tsagkatakis <jtsagata@gmail.com>"]
-edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-freedesktop_entry_parser = "1.1.1"
-serde = "1.0.123"
-serde_json = "1.0"
-systemd = "0.8.2"
-regex = "1.4.3"
-colored = "2.0.0"
-env-lang = "1.0.0"
-stybulate = "1.1.1"
-clap = "2.33.3"
-exec = "0.3.1"
-nix = "0.19.1"
+[workspace]
+members = [
+  "cli",
+  "core"
+]

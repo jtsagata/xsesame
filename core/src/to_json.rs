@@ -1,8 +1,7 @@
 use serde::{Serialize, Serializer};
 use serde::ser::SerializeStruct;
 
-use crate::desktop_info::DesktopInfo;
-use crate::get_sessions;
+use crate::DesktopInfo;
 
 /// Serializer for DesktopInfo
 impl Serialize for DesktopInfo {
@@ -21,8 +20,3 @@ impl Serialize for DesktopInfo {
   }
 }
 
-/// Export sessions as json
-pub fn export(xsession_dir: &str) -> String {
-  let sessions = get_sessions(&xsession_dir);
-  serde_json::to_string(&sessions).unwrap()
-}

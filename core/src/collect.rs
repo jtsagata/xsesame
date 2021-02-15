@@ -1,15 +1,27 @@
+use std::{io, process};
 use std::collections::BTreeMap;
 use std::fs::{DirEntry, read_dir};
-use std::io;
 use std::path::Path;
 
 use colored::*;
 use freedesktop_entry_parser::parse_entry;
 
-use crate::desktop_info::DesktopInfo;
+use crate::DesktopInfo;
+
+/// Get all sessions in directory
+pub fn get_sessions(xsession_dir: &str) -> BTreeMap<String, DesktopInfo> {
+  let mut sessions = BTreeMap::<String, DesktopInfo>::new();
+
+  if collect_sessions(&mut sessions, &xsession_dir).is_err() {
+    eprintln!("{} Unable to parse sessions", "Error:".red());
+    process::exit(-1);
+  }
+
+  sessions
+}
 
 /// Collect and return all sessions
-pub fn collect_sessions(sessions: &mut BTreeMap<String, DesktopInfo>, xsession_dir: &str) -> io::Result<()> {
+fn collect_sessions(sessions: &mut BTreeMap<String, DesktopInfo>, xsession_dir: &str) -> io::Result<()> {
   let mut file_paths = read_dir(xsession_dir)?
     .filter(|entry| is_desktop_file(entry))
     .map(|res| res.map(|e| e.path()))
