@@ -4,4 +4,4 @@
 rm ./target/debug/xsesame
 cargo build
 
-./target/debug/xsesame --session-dir test/samples "$@"
+LC_ALL=el_GR.utf8 ./target/debug/xsesame --session-dir test/samples "$@"

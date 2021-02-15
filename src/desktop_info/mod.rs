@@ -55,7 +55,7 @@ impl DesktopInfo {
   }
 
   /// Get the session comment in native language if available, fallbacks to English
-  pub fn comment(&self) -> String {
+  pub fn comment_with_nls(&self) -> String {
     let mut lang_env = std::env::var("LC_ALL");
     if lang_env.is_err() {
       lang_env = std::env::var("LANG");
@@ -74,6 +74,13 @@ impl DesktopInfo {
       }
     };
   }
+
+  /// Get the session comment
+  pub fn comment(&self) -> String {
+        self.get_attribute_str("Comment")
+  }
+
+
 
   /// Helper to get an attribute
   fn get_attribute(&self, attr: &str) -> Option<&str> {

@@ -65,10 +65,9 @@ fn main() {
     sub_command = true;
   }
 
-  if let Some(matches) = matches.subcommand_matches("export") {
-    //TODO:
-    println!("TODO: export");
-    sub_command = true;
+  if let Some(_matches) = matches.subcommand_matches("export") {
+    // sub_command = true;
+    todo!();
   }
 
   // If no subcommand is given rerun with list option
@@ -123,13 +122,43 @@ fn cmd_enable_disable(xsession_dir: &str, matches: &ArgMatches, ext: &str) {
 /// List sessions action
 fn cmd_list_sessions(xsession_dir: &str, matches: &ArgMatches) {
   let style = matches.value_of("style").unwrap_or("Fancy");
+  let use_nls = matches.is_present("nls");
+  let use_emoji = matches.is_present("emoji");
+
   let style = match style {
     "Fancy" => { Style::Fancy }
     "Grid" => { Style::Grid }
     "Simple" => { Style::Simple }
     &_ => { Style::Plain }
   };
-  print_sessions(xsession_dir, style);
+
+  let sessions = get_sessions(&xsession_dir);
+  let mut elements: Vec<Vec<Cell>> = Vec::new();
+  for (_, el) in sessions {
+
+    let active_str = if use_emoji {
+      if el.is_active() { " ✓ " } else { " ✗ "}
+    }  else if el.is_active() { "+" } else { "-" };
+    let key = format!("{} {}", active_str, el.path_key());
+
+    let comment = if use_nls {
+      el.comment_with_nls()
+    } else {
+      el.comment()
+    };
+
+    elements.push(vec![Cell::from(key.as_str()), Cell::from(el.name().as_str()), Cell::from(comment.as_str())]);
+  }
+  let table = Table::new(
+    style, elements,
+    Some(Headers::from(vec!["Key", "Name", "Comment"])),
+  ).tabulate();
+  println!("List of active and inactive sessions:");
+  println!();
+  println!("{}", table);
+  println!();
+  println!("To enable/disable a session run: {} {}", program_name().unwrap().green(), "enable|disable <key>".green());
+  println!();
 }
 
 /// Command line completion generation
@@ -163,31 +192,6 @@ fn cmd_rerun_with_list_cmd(xsession_dir: &str) {
       process::exit(errno.0);
     }
   }
-}
-
-/// Print sessions with style
-fn print_sessions(xsession_dir: &str, style: stybulate::Style) {
-  let sessions = get_sessions(&xsession_dir);
-
-  let mut elements: Vec<Vec<Cell>> = Vec::new();
-  for (_, el) in sessions {
-    // let active_str = if el.is_active() { " ✓ " } else { " ✗ "};
-    let active_str = if el.is_active() { "+" } else { "-" };
-    let key = format!("{} {}", active_str, el.path_key());
-    elements.push(vec![Cell::from(key.as_str()), Cell::from(el.name().as_str()), Cell::from(el.comment().as_str())]);
-  }
-
-  let table = Table::new(
-    style, elements,
-    Some(Headers::from(vec!["Key", "Name", "Comment"])),
-  ).tabulate();
-
-  println!("List of active and inactive sessions:");
-  println!();
-  println!("{}", table);
-  println!();
-  println!("To enable/disable a session run: {} {}", program_name().unwrap().green(), "enable|disable <key>".green());
-  println!();
 }
 
 /// Get all sessions in directory
