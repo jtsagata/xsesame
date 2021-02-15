@@ -1,5 +1,5 @@
 use std::collections::BTreeMap;
-use std::fs::read_dir;
+use std::fs::{DirEntry, read_dir};
 use std::io;
 use std::path::Path;
 
@@ -11,16 +11,7 @@ use crate::desktop_info::DesktopInfo;
 /// Collect and return all sessions
 pub fn collect_sessions(sessions: &mut BTreeMap<String, DesktopInfo>, xsession_dir: &str) -> io::Result<()> {
   let mut file_paths = read_dir(xsession_dir)?
-    .filter(|entry| {
-      match entry {
-        Ok(e) => {
-          let local = e.path();
-          let ext = local.extension().unwrap_or_default();
-          ext == "desktop" || ext == "desktop-disable"
-        }
-        Err(_) => { false }
-      }
-    })
+    .filter(|entry| is_desktop_file(entry))
     .map(|res| res.map(|e| e.path()))
     .collect::<Result<Vec<_>, io::Error>>()?;
 
@@ -37,13 +28,16 @@ pub fn collect_sessions(sessions: &mut BTreeMap<String, DesktopInfo>, xsession_d
         let desktop = DesktopInfo::new(file_path, desktop_entry);
         match desktop {
           Ok(desktop) => {
+            // Everything is ok add it to session list
             sessions.entry(map_key).or_insert(desktop);
           }
           Err(error) => {
+            // The parsing was ok but some key elements is missing
             println!("{} {}", "Warning:".yellow(), error)
           }
         }
       }
+      // The parser generates an error
       Err(_) => {
         let just_the_file = Path::new(&file_path).file_name().unwrap().to_string_lossy();
         eprintln!("{} Unable to parse '{}'.", "Warning:".yellow(), just_the_file.green());
@@ -52,4 +46,19 @@ pub fn collect_sessions(sessions: &mut BTreeMap<String, DesktopInfo>, xsession_d
   }
 
   Ok(())
+}
+
+/// Check if something looks like a desktop file
+fn is_desktop_file(entry: &Result<DirEntry, std::io::Error>) -> bool {
+  use regex::Regex;
+  let re = Regex::new(r"^.*\.desktop.*$").unwrap();
+
+  match entry {
+    Ok(entry) => {
+      let file_name = entry.file_name();
+      let s = file_name.to_str().unwrap_or("");
+      re.is_match(s)
+    }
+    Err(_) => { false }
+  }
 }
