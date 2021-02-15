@@ -1,0 +1,7 @@
+#!/bin/bash
+# Don't mess with system files
+
+rm ./target/debug/xsesame
+cargo build
+
+./target/debug/xsesame --session-dir test/samples "$@"

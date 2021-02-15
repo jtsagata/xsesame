@@ -46,7 +46,7 @@ impl DesktopInfo {
   pub fn path_key(&self) -> String {
     let path = Path::new(&self.path).with_extension("");
     let res = path.file_name().unwrap();
-    res.to_str().unwrap().to_string()
+    res.to_str().unwrap().to_string().to_lowercase()
   }
 
   /// Get the session name

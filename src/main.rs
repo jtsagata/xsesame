@@ -45,7 +45,18 @@ fn main() {
   }
 
   if let Some(matches) = matches.subcommand_matches("disable") {
-    cmd_enable_disable(xsession_dir, matches, &"desktop-disable");
+
+    // check if there is at least 2 enabled sessions
+    let active_sessions = get_sessions(&xsession_dir)
+      .values()
+      .filter(|el| el.is_active())
+      .count();
+
+    if active_sessions < 2 {
+      eprintln!("{}", "There is only one active session! Nothing to be done!".yellow());
+    } else {
+      cmd_enable_disable(xsession_dir, matches, &"desktop-disable");
+    }
     sub_command = true;
   }
 

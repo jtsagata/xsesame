@@ -19,17 +19,15 @@ pub fn collect_sessions(sessions: &mut BTreeMap<String, DesktopInfo>, xsession_d
 
   for path in file_paths {
     let file_path = path.display().to_string();
-    let base_path = path.with_extension("").display().to_string();
-    let map_key = base_path.replace(xsession_dir, "").replace("/", "");
-
     let desktop_entry = parse_entry(path);
+
     match desktop_entry {
       Ok(desktop_entry) => {
         let desktop = DesktopInfo::new(file_path, desktop_entry);
         match desktop {
           Ok(desktop) => {
             // Everything is ok add it to session list
-            sessions.entry(map_key).or_insert(desktop);
+            sessions.entry(desktop.path_key()).or_insert(desktop);
           }
           Err(error) => {
             // The parsing was ok but some key elements is missing
