@@ -10,7 +10,7 @@ impl Serialize for DesktopInfo {
   {
     let mut state = serializer.serialize_struct("Color", 7)?;
     state.serialize_field("key", self.path_key().as_str())?;
-    state.serialize_field("path", self.path.as_str())?;
+    state.serialize_field("path", self.path().as_str())?;
     state.serialize_field("name", self.name().as_str())?;
     state.serialize_field("comment", self.comment().as_str())?;
     state.serialize_field("comment-nls", self.comment_with_nls().as_str())?;

@@ -1,7 +1,6 @@
 use clap::{App, AppSettings, Arg, crate_version, SubCommand};
+use xsesame_core::get_default_session_dir;
 
-/// The default place of session data
-pub const XSESSION_DIR: &str = "/usr/share/xsessions";
 
 /// Generate the command line argument structure
 pub fn build_cli() -> App<'static, 'static> {
@@ -27,7 +26,7 @@ The propose of this little tool is to minimize the clutter in the display manage
     .arg(Arg::with_name("session-dir")
       .long("session-dir").short("d")
       .value_name("XSESSION_DIR").takes_value(true)
-      .default_value(XSESSION_DIR)
+      .default_value(get_default_session_dir())
       .global(true)
       .help("Session config directory")
       .next_line_help(true)

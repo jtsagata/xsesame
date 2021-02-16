@@ -14,7 +14,7 @@ use colored::*;
 use nix::unistd::Uid;
 use stybulate::{Cell, Headers, Style, Table};
 
-use xsesame_core::collect::get_sessions;
+use xsesame_core::get_sessions;
 
 mod opts;
 
@@ -23,7 +23,7 @@ fn main() {
   let matches = opts::build_cli().get_matches();
 
   // Sessions directory
-  let xsession_dir = matches.value_of("session-dir").unwrap_or(opts::XSESSION_DIR);
+  let xsession_dir = matches.value_of("session-dir").unwrap();
   if !Path::new(xsession_dir).is_dir() {
     eprintln!("{} '{}' is not a directory", "Error:".red(), xsession_dir.green());
     process::exit(-1);
