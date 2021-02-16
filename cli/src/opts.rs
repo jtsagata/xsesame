@@ -91,7 +91,7 @@ fn build_list_cli() -> App<'static, 'static> {
       .help("Show comments")
       .takes_value(true).value_name("comments")
       .default_value("auto")
-      .possible_values(&["auto", "display", "hide"])
+      .possible_values(&["auto", "show", "hide"])
       .hide_default_value(true)
       .require_equals(true)
       .next_line_help(true)
