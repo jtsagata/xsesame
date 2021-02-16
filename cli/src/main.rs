@@ -7,16 +7,17 @@
 //!
 
 use std::{io, process};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use clap::{ArgMatches, Shell};
 use colored::*;
-use nix::unistd::Uid;
-use stybulate::{Cell, Headers, Style, Table};
 
 use xsesame_core::get_sessions;
 
 mod opts;
+mod list_sessions;
+mod enable_disable;
+mod tools;
 
 #[cfg(target_os = "linux")]
 fn main() {
@@ -32,12 +33,12 @@ fn main() {
   let mut sub_command: bool = false;
 
   if let Some(matches) = matches.subcommand_matches("list") {
-    cmd_list_sessions(xsession_dir, matches);
+    list_sessions::cmd_list_sessions(xsession_dir, matches);
     sub_command = true;
   }
 
   if let Some(matches) = matches.subcommand_matches("enable") {
-    cmd_enable_disable(xsession_dir, matches, &"desktop");
+    enable_disable::cmd_enable_disable(xsession_dir, matches, &"desktop");
     sub_command = true;
   }
 
@@ -52,7 +53,7 @@ fn main() {
     if active_sessions < 2 {
       eprintln!("{}", "There is only one active session! Nothing to be done!".yellow());
     } else {
-      cmd_enable_disable(xsession_dir, matches, &"desktop-disable");
+      enable_disable::cmd_enable_disable(xsession_dir, matches, &"desktop-disable");
     }
     sub_command = true;
   }
@@ -74,92 +75,6 @@ fn main() {
   }
 }
 
-/// This enables or disable a session given a key
-fn cmd_enable_disable(xsession_dir: &str, matches: &ArgMatches, ext: &str) {
-  let key = matches.value_of("session_key").unwrap();
-  let file = get_filename_from_key(&xsession_dir, &key);
-  let use_journal = !matches.is_present("no-journald");
-
-  match file {
-    Ok(_) => {}
-    Err(err) => {
-      eprintln!("{}: {}", "Error".red(), err);
-      process::exit(-1);
-    }
-  }
-
-  // File rename
-  let file = file.unwrap();
-  let orig_name = file.clone();
-  let new_name = file.with_extension(ext);
-
-  if orig_name == new_name {
-    let state = if ext == "desktop" { "enabled" } else { "disabled" };
-    eprintln!("Nothing to be done, '{}' is {}.", key.green(), state.green());
-    return;
-  }
-
-  use systemd::journal;
-  let done = std::fs::rename(&orig_name, &new_name);
-  if done.is_ok() {
-    println!("{} '{}' -> '{}'", "Done:".green(), orig_name.display().to_string().green(), new_name.display().to_string().green());
-    if use_journal {
-      journal::print(1, &format!("Rename file: '{}' ->  '{}'", orig_name.display(), new_name.display()));
-    }
-  } else {
-    if use_journal {
-      journal::print(1, &format!("Can't rename  file: '{}'", orig_name.display()));
-    }
-    eprintln!("{}  Can't rename '{}'", "Error:".red(), orig_name.display().to_string().green());
-    if !Uid::effective().is_root() {
-      eprintln!("You must run this executable with root permissions.");
-    }
-  }
-}
-
-/// List sessions action
-fn cmd_list_sessions(xsession_dir: &str, matches: &ArgMatches) {
-  let style = matches.value_of("style").unwrap_or("Fancy");
-  let use_nls = matches.is_present("nls");
-  let use_emoji = matches.is_present("emoji");
-
-  let sessions = get_sessions(&xsession_dir);
-
-
-  let style = match style {
-    "Fancy" => { Style::Fancy }
-    "Grid" => { Style::Grid }
-    "Simple" => { Style::Simple }
-    &_ => { Style::Plain }
-  };
-
-  let mut elements: Vec<Vec<Cell>> = Vec::new();
-  for (_, el) in sessions {
-
-    let active_str = if use_emoji {
-      if el.is_active() { " ✓ " } else { " ✗ "}
-    }  else if el.is_active() { "+" } else { "-" };
-    let key = format!("{} {}", active_str, el.path_key());
-
-    let comment = if use_nls {
-      el.comment_with_nls()
-    } else {
-      el.comment()
-    };
-
-    elements.push(vec![Cell::from(key.as_str()), Cell::from(el.name().as_str()), Cell::from(comment.as_str())]);
-  }
-  let table = Table::new(
-    style, elements,
-    Some(Headers::from(vec!["Key", "Name", "Comment"])),
-  ).tabulate();
-  println!("List of active and inactive sessions:");
-  println!();
-  println!("{}", table);
-  println!();
-  println!("To enable/disable a session run: {} {}", program_name().unwrap().green(), "enable|disable <key>".green());
-  println!();
-}
 
 /// Command line completion generation
 fn cmd_completion(matches: &ArgMatches) {
@@ -194,36 +109,6 @@ fn cmd_rerun_with_list_cmd(xsession_dir: &str) {
   }
 }
 
-/// Helper to get a PathBuf pointing to the session file
-fn get_filename_from_key(xsession_dir: &str, key: &str) -> Result<PathBuf, String> {
-  let sessions = get_sessions(xsession_dir);
-
-  // Session key must exist
-  if !sessions.contains_key(key) {
-    return Err(format!("'{}' is not a valid session key", key.green()));
-  }
-
-  // File must exist
-  let file_name = sessions.get(key).unwrap().path();
-  let orig = Path::new(&file_name).to_owned();
-  if !orig.exists() {
-    return Err(format!("File name {}' does not exist", file_name.green()));
-  }
-
-  Ok(orig)
-}
-
-/// Helper to get the executable name without the path
-fn program_name() -> Option<String> {
-  use std::ffi::OsStr;
-
-  std::env::current_exe().ok()
-    .as_ref()
-    .map(Path::new)
-    .and_then(Path::file_name)
-    .and_then(OsStr::to_str)
-    .map(String::from)
-}
 
 /// Export sessions as json
 pub fn export_json(xsession_dir: &str) -> String {
