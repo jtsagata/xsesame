@@ -1,38 +1,48 @@
 use std::path::Path;
 
-use colored::*;
 use freedesktop_entry_parser::Entry;
 
 /// A path to a session file, and a parser to it
 pub struct SessionInfo {
   path: String,
   desktop: freedesktop_entry_parser::Entry,
+  is_valid: bool,
+  error: String,
 }
 
 impl SessionInfo {
   /// Create a new DesktopInfo object and validate some basic properties
-  pub fn new(path: String, desktop: Entry) -> Result<Self, String> {
+  pub fn new(path: String, desktop: Entry) -> Self {
     let path_copy = path.clone();
-    let just_the_file = Path::new(&path_copy).file_name().unwrap().to_string_lossy();
-    let entry = SessionInfo { path, desktop };
+
+    let file = Path::new(&path_copy).file_name();
+    let just_the_file = file.unwrap().to_string_lossy();
+
+    let is_valid = true;
+    let error = "".to_string();
+
+    let mut entry = SessionInfo { path, desktop, is_valid, error };
 
     // Test Type="Application"
     let d_type = entry.get_attribute("Type");
     match d_type {
       None => {
-        return Err(format!("The file '{}' does not specify a {}.", just_the_file.green(), "Type".bold()));
+        entry.error = format!("The file '{}' does not specify a {}.", just_the_file, "Type");
+        entry.is_valid = false;
       }
       Some(d_type) => if d_type != "Application" {
-        return Err(format!("The file '{}' specify {} as '{}'.", just_the_file.green(), "Type".bold(), d_type.green()));
+        entry.error = format!("The file '{}' specify Type as '{}'", just_the_file, d_type);
+        entry.is_valid = false;
       },
     }
 
     // Test if provides a Name
     if entry.get_attribute("Name").is_none() {
-      return Err(format!("The file '{}' does not specify a {}.", just_the_file.green(), "Name".bold()));
+      entry.error = format!("The file '{}' does not specify a Name.", just_the_file);
+      entry.is_valid = false;
     }
 
-    Ok(entry)
+    entry
   }
 
   /// Export the path
