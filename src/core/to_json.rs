@@ -1,10 +1,10 @@
 use serde::{Serialize, Serializer};
 use serde::ser::SerializeStruct;
 
-use crate::core::DesktopInfo;
+use crate::core::SessionInfo;
 
 /// Serializer for DesktopInfo
-impl Serialize for DesktopInfo {
+impl Serialize for SessionInfo {
   fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where S: Serializer,
   {

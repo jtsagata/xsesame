@@ -6,11 +6,11 @@ use std::path::Path;
 use colored::*;
 use freedesktop_entry_parser::parse_entry;
 
-use crate::core::DesktopInfo;
+use crate::core::SessionInfo;
 
 /// Get all sessions in directory
-pub fn get_sessions(xsession_dir: &str) -> BTreeMap<String, DesktopInfo> {
-  let mut sessions = BTreeMap::<String, DesktopInfo>::new();
+pub fn get_sessions(xsession_dir: &str) -> BTreeMap<String, SessionInfo> {
+  let mut sessions = BTreeMap::<String, SessionInfo>::new();
 
   if collect_sessions(&mut sessions, &xsession_dir).is_err() {
     eprintln!("{} Unable to parse sessions", "Error:".red());
@@ -21,7 +21,7 @@ pub fn get_sessions(xsession_dir: &str) -> BTreeMap<String, DesktopInfo> {
 }
 
 /// Collect and return all sessions
-fn collect_sessions(sessions: &mut BTreeMap<String, DesktopInfo>, xsession_dir: &str) -> io::Result<()> {
+fn collect_sessions(sessions: &mut BTreeMap<String, SessionInfo>, xsession_dir: &str) -> io::Result<()> {
   let mut file_paths = read_dir(xsession_dir)?
     .filter(|entry| is_desktop_file(entry))
     .map(|res| res.map(|e| e.path()))
@@ -35,7 +35,7 @@ fn collect_sessions(sessions: &mut BTreeMap<String, DesktopInfo>, xsession_dir: 
 
     match desktop_entry {
       Ok(desktop_entry) => {
-        let desktop = DesktopInfo::new(file_path, desktop_entry);
+        let desktop = SessionInfo::new(file_path, desktop_entry);
         match desktop {
           Ok(desktop) => {
             // Everything is ok add it to session list

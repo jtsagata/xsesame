@@ -1,13 +1,13 @@
 use std::env;
 
 pub use collect::get_sessions as get_sessions;
-pub use desktop_info::DesktopInfo as DesktopInfo;
+pub use session_info::SessionInfo as SessionInfo;
 pub use tools::get_filename_from_key as get_filename_from_key;
 pub use tools::program_name as program_name;
 
 mod collect;
 mod to_json;
-mod desktop_info;
+mod session_info;
 mod tools;
 
 /// The default place of session data

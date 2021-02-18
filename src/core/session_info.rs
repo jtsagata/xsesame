@@ -4,17 +4,17 @@ use colored::*;
 use freedesktop_entry_parser::Entry;
 
 /// A path to a session file, and a parser to it
-pub struct DesktopInfo {
+pub struct SessionInfo {
   path: String,
   desktop: freedesktop_entry_parser::Entry,
 }
 
-impl DesktopInfo {
+impl SessionInfo {
   /// Create a new DesktopInfo object and validate some basic properties
   pub fn new(path: String, desktop: Entry) -> Result<Self, String> {
     let path_copy = path.clone();
     let just_the_file = Path::new(&path_copy).file_name().unwrap().to_string_lossy();
-    let entry = DesktopInfo { path, desktop };
+    let entry = SessionInfo { path, desktop };
 
     // Test Type="Application"
     let d_type = entry.get_attribute("Type");
