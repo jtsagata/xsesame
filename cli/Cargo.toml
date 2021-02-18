@@ -16,5 +16,4 @@ nix = "0.19.1"
 terminal_size = "0.1.16"
 
 [dependencies.xsesame-core]
-version = "0.1"
 path = "../core"

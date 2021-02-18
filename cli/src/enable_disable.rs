@@ -2,9 +2,10 @@ use std::process;
 
 use clap::ArgMatches;
 use colored::*;
-use nix::unistd::Uid;
 
 use crate::tools;
+
+nix = "0.19.1"
 
 /// This enables or disable a session given a key
 pub fn cmd_enable_disable(xsession_dir: &str, matches: &ArgMatches, ext: &str) {
