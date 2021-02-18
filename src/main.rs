@@ -71,7 +71,10 @@ fn main() {
 
   // If no subcommand is given rerun with list option
   if !sub_command {
-    cmd_rerun_with_list_cmd(xsession_dir)
+    match core::run_with_gui() {
+      true => { todo!() }
+      false => { cmd_rerun_with_list_cmd(xsession_dir) }
+    }
   }
 }
 

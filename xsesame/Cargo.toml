@@ -1,8 +1,0 @@
-[package]
-name = "xsesame"
-version = "0.1.0"
-authors = ["Giannis Tsagkatakis <jtsagata@gmail.com>"]
-edition = "2018"
-
-[dependencies]
-exec = "0.3.1"
