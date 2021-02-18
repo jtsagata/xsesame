@@ -5,8 +5,8 @@ use std::path::Path;
 
 use colored::*;
 use freedesktop_entry_parser::parse_entry;
-use crate::DesktopInfo;
 
+use crate::core::DesktopInfo;
 
 /// Get all sessions in directory
 pub fn get_sessions(xsession_dir: &str) -> BTreeMap<String, DesktopInfo> {

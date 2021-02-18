@@ -1,7 +1,7 @@
 use serde::{Serialize, Serializer};
 use serde::ser::SerializeStruct;
 
-use crate::DesktopInfo;
+use crate::core::DesktopInfo;
 
 /// Serializer for DesktopInfo
 impl Serialize for DesktopInfo {

@@ -1,6 +1,6 @@
 use clap::{App, AppSettings, Arg, crate_version, SubCommand};
 
-use xsesame_core::get_default_session_dir;
+use crate::core::get_default_session_dir;
 
 const HELP_TOP: &str = "\nSome desktop environments install a lot of different types that have to real use for
 the end user. For example cinnamon also install a cinnamon fallback. Others install a lot more.

@@ -3,9 +3,7 @@ use colored::*;
 use stybulate::{Cell, Headers, Style, Table};
 use terminal_size::{Height, terminal_size, Width};
 
-use xsesame_core::get_sessions;
-
-use crate::tools;
+use crate::core::{get_sessions, program_name};
 
 /// List sessions action
 pub fn cmd_list_sessions(xsession_dir: &str, matches: &ArgMatches) {
@@ -70,7 +68,7 @@ pub fn cmd_list_sessions(xsession_dir: &str, matches: &ArgMatches) {
   println!();
   println!("{}", table);
   println!();
-  println!("To enable/disable a session run: {} {}", tools::program_name().unwrap().green(), "enable|disable <key>".green());
+  println!("To enable/disable a session run: {} {}", program_name().unwrap().green(), "enable|disable <key>".green());
   println!();
 }
 

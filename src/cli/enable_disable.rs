@@ -2,15 +2,17 @@ use std::process;
 
 use clap::ArgMatches;
 use colored::*;
+use nix::unistd::Uid;
 
-use crate::tools;
-
-nix = "0.19.1"
+use crate::core;
 
 /// This enables or disable a session given a key
 pub fn cmd_enable_disable(xsession_dir: &str, matches: &ArgMatches, ext: &str) {
   let key = matches.value_of("session_key").unwrap();
-  let file = tools::get_filename_from_key(&xsession_dir, &key);
+
+  crate::core::get_default_session_dir();
+
+  let file = core::get_filename_from_key(&xsession_dir, &key);
   let use_journal = !matches.is_present("no-journald");
 
   match file {
