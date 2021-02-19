@@ -99,13 +99,13 @@ fn build_list_cli() -> App<'static, 'static> {
 
 
     .arg(Arg::with_name("emoji")
-      .long("with-emoji").short("e")
+      .long("no-emoji").short("e")
       .help("Nice active/inactive symbols")
       .display_order(2)
     )
 
     .arg(Arg::with_name("nls")
-      .long("with-nls").short("l")
+      .long("no-nls").short("l")
       .help("Show comment localized if possible")
       .display_order(2)
     )

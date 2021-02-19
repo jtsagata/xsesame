@@ -28,8 +28,8 @@ fn color_str(str: &str, acive: bool) -> String {
 
 /// List sessions action
 pub fn cmd_list_sessions(xsession_dir: &str, options: &ArgMatches) {
-  let use_nls = options.is_present("nls");
-  let use_emoji = options.is_present("emoji");
+  let no_nls = !options.is_present("nls");
+  let no_emoji = !options.is_present("emoji");
   let show_comments_opt = options.value_of("comments").unwrap();
   let show_comments = check_if_show_comments(show_comments_opt);
 
@@ -46,12 +46,12 @@ pub fn cmd_list_sessions(xsession_dir: &str, options: &ArgMatches) {
 
   let mut display_lines: Vec<Vec<String>> = Vec::new();
   for (_, ses) in filter_sessions {
-    let active_str_color = color_str(&get_active_str(use_emoji, &ses), ses.is_active());
+    let active_str_color = color_str(&get_active_str(no_emoji, &ses), ses.is_active());
     let path_key = ses.get_path_key().pad_to_width(max_key_len);
     let path_key_color = color_str(&path_key, ses.is_active());
     let name = ses.get_name().pad_to_width(max_name_len);
     let name_color = color_str(&name, ses.is_active());
-    let comment_color = color_str(&ses.get_comment(use_nls), ses.is_active());
+    let comment_color = color_str(&ses.get_comment(no_nls), ses.is_active());
 
     let mut line = vec![active_str_color, path_key_color, name_color];
     if show_comments {
@@ -98,8 +98,8 @@ fn check_if_show_comments(comments: &str) -> bool {
 
 
 /// Get active state as a displayable str
-fn get_active_str(use_emoji: bool, el: &SessionInfo) -> String {
-  if use_emoji {
+fn get_active_str(emoji: bool, el: &SessionInfo) -> String {
+  if emoji {
     if el.is_active() { "✓" } else { "✗" }
   } else if el.is_active() { "+" } else { "-" }.to_string()
 }
