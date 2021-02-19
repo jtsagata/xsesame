@@ -36,7 +36,7 @@ fn collect_sessions(sessions: &mut BTreeMap<String, SessionInfo>, xsession_dir: 
     match desktop_entry {
       Ok(desktop_entry) => {
         let desktop = SessionInfo::new(file_path, desktop_entry);
-        sessions.entry(desktop.path_key()).or_insert(desktop);
+        sessions.entry(desktop.get_path_key()).or_insert(desktop);
       }
       // The parser generates an error
       Err(_) => {

@@ -49,14 +49,14 @@ impl SessionInfo {
   }
 
   /// Get the path key from filename
-  pub fn path_key(&self) -> String {
+  pub fn get_path_key(&self) -> String {
     let path = Path::new(&self.path).with_extension("");
     let res = path.file_name().unwrap();
     res.to_str().unwrap().to_string().to_lowercase()
   }
 
   /// Get the session name
-  pub fn name(&self) -> String {
+  pub fn get_name(&self) -> String {
     self.get_attribute_str("Name")
   }
 
@@ -70,8 +70,16 @@ impl SessionInfo {
     self.error.is_none()
   }
 
+  /// handy function to get comment
+  pub fn get_comment(&self, with_nls: bool) -> String {
+    match with_nls {
+      false => { self.get_attribute_str("Comment") }
+      true => { self.comment_with_nls() }
+    }
+  }
+
   /// Get the session comment in native language if available, fallbacks to English
-  pub fn comment_with_nls(&self) -> String {
+  fn comment_with_nls(&self) -> String {
     let mut lang_env = std::env::var("LC_ALL");
     if lang_env.is_err() {
       lang_env = std::env::var("LANG");
@@ -90,12 +98,6 @@ impl SessionInfo {
       }
     };
   }
-
-  /// Get the session comment
-  pub fn comment(&self) -> String {
-    self.get_attribute_str("Comment")
-  }
-
 
   /// Helper to get an attribute
   fn get_attribute(&self, attr: &str) -> Option<&str> {

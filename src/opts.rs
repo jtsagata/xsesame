@@ -97,14 +97,6 @@ fn build_list_cli() -> App<'static, 'static> {
       .next_line_help(true)
     )
 
-    .arg(Arg::with_name("style")
-      .possible_values(&["Plain", "Fancy", "Grid", "Simple"])
-      .takes_value(true).value_name("Style")
-      .default_value("Fancy")
-      .hide_default_value(true)
-      .help("Display table with style")
-      .next_line_help(true)
-    )
 
     .arg(Arg::with_name("emoji")
       .long("with-emoji").short("e")
