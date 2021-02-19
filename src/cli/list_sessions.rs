@@ -60,13 +60,18 @@ pub fn cmd_list_sessions(xsession_dir: &str, options: &ArgMatches) {
     display_lines.push(line);
   }
 
-  // TODO: Hide column
   println!("List of active and inactive sessions:");
-  println!();
-  println!("   {:a$}  {:b$} {}", "Key".bold(), "Name".bold(), "Comment".bold(),
-           a = max_key_len, b = max_name_len);
-  for line in display_lines {
-    println!("{}  {}  {} {}", line[0].bold(), line[1], line[2], line[3]);
+  if show_comments {
+    println!("   {:a$}  {:b$} {}", "Key".bold(), "Name".bold(), "Comment".bold(),
+             a = max_key_len, b = max_name_len);
+    for line in display_lines {
+      println!("{}  {}  {} {}", line[0].bold(), line[1], line[2], line[3]);
+    }
+  } else {
+    println!("   {:a$}  {:b$}", "Key".bold(), "Name".bold(), a = max_key_len, b = max_name_len);
+    for line in display_lines {
+      println!("{}  {}  {}", line[0].bold(), line[1], line[2]);
+    }
   }
   println!();
   println!("To enable/disable a session run: {} {}", program_name().unwrap().green(), "enable|disable <key>".green());
