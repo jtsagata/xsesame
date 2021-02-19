@@ -6,8 +6,7 @@ use freedesktop_entry_parser::Entry;
 pub struct SessionInfo {
   path: String,
   desktop: freedesktop_entry_parser::Entry,
-  is_valid: bool,
-  error: String,
+  error: Option<String>,
 }
 
 impl SessionInfo {
@@ -18,28 +17,24 @@ impl SessionInfo {
     let file = Path::new(&path_copy).file_name();
     let just_the_file = file.unwrap().to_string_lossy();
 
-    let is_valid = true;
-    let error = "".to_string();
-
-    let mut entry = SessionInfo { path, desktop, is_valid, error };
+    let error: Option<String> = None;
+    let mut entry = SessionInfo { path, desktop, error };
 
     // Test Type="Application"
     let d_type = entry.get_attribute("Type");
     match d_type {
       None => {
-        entry.error = format!("The file '{}' does not specify a {}.", just_the_file, "Type");
-        entry.is_valid = false;
+        entry.error = Some(format!("The file '{}' does not specify a {}.", just_the_file, "Type"));
       }
+      // TODO: Also XSession
       Some(d_type) => if d_type != "Application" {
-        entry.error = format!("The file '{}' specify Type as '{}'", just_the_file, d_type);
-        entry.is_valid = false;
+        entry.error = Some(format!("The file '{}' specify Type as '{}'", just_the_file, d_type));
       },
     }
 
     // Test if provides a Name
     if entry.get_attribute("Name").is_none() {
-      entry.error = format!("The file '{}' does not specify a Name.", just_the_file);
-      entry.is_valid = false;
+      entry.error = Some(format!("The file '{}' does not specify a Name.", just_the_file));
     }
 
     entry
@@ -65,6 +60,11 @@ impl SessionInfo {
   /// Get the session icon (if any)
   pub fn icon(&self) -> String {
     self.get_attribute_str("Icon")
+  }
+
+  /// Get if valid
+  pub fn is_valid(&self) -> bool {
+    self.error.is_none()
   }
 
   /// Get the session comment in native language if available, fallbacks to English
