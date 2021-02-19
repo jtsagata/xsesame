@@ -12,33 +12,36 @@ pub struct SessionInfo {
 impl SessionInfo {
   /// Create a new DesktopInfo object and validate some basic properties
   pub fn new(path: String, desktop: Entry) -> Self {
-    let path_copy = path.clone();
-
-    let file = Path::new(&path_copy).file_name();
-    let just_the_file = file.unwrap().to_string_lossy();
-
     let error: Option<String> = None;
     let mut entry = SessionInfo { path, desktop, error };
+    entry.validate_entry();
+    entry
+  }
+
+  /// Validates an entry
+  fn validate_entry(&mut self) {
+    let file = self.path();
+    let file = Path::new(&file).file_name();
+    let just_the_file = file.unwrap().to_string_lossy();
 
     // Test Type="Application"
-    let d_type = entry.get_attribute("Type");
+    let d_type = self.get_attribute("Type");
+    let valid_session_types = vec!["XSession", "Application"];
     match d_type {
       None => {
-        entry.error = Some(format!("The file '{}' does not specify a {}.", just_the_file, "Type"));
+        self.error = Some(format!("The file '{}' does not specify a {}.", just_the_file, "Type"));
       }
-      // TODO: Also XSession
-      Some(d_type) => if d_type != "Application" {
-        entry.error = Some(format!("The file '{}' specify Type as '{}'", just_the_file, d_type));
+      Some(d_type) => if !valid_session_types.contains(&d_type) {
+        self.error = Some(format!("The file '{}' specify Type as '{}'", just_the_file, d_type));
       },
     }
 
     // Test if provides a Name
-    if entry.get_attribute("Name").is_none() {
-      entry.error = Some(format!("The file '{}' does not specify a Name.", just_the_file));
+    if self.get_attribute("Name").is_none() {
+      self.error = Some(format!("The file '{}' does not specify a Name.", just_the_file));
     }
-
-    entry
   }
+
 
   /// Export the path
   pub fn path(&self) -> String {
