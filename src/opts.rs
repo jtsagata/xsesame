@@ -23,7 +23,7 @@ pub fn build_cli() -> App<'static, 'static> {
     .setting(AppSettings::GlobalVersion)
     .setting(AppSettings::InferSubcommands)
 
-    .arg(session_dir_arg())
+    .arg(session_dir_arg().global(true))
 
     .subcommand(
       SubCommand::with_name("export")
@@ -48,18 +48,24 @@ pub fn build_cli() -> App<'static, 'static> {
     )
 
     .subcommand(build_enable_disable_cli(
-      "enable",
-      "Enable a session using a key from list (for example cinnamon2d)")
-      .display_order(2)
-      .arg(session_dir_arg())
+      "enable", "Enable a session")
+                  .display_order(3)
+                // .arg(session_dir_arg())
     )
 
     .subcommand(build_enable_disable_cli(
-      "disable",
-      "Disable a session using a key from list (for example cinnamon2d)")
-      .display_order(3)
-      .arg(session_dir_arg())
+      "disable", "Disable a session")
+                  .display_order(4)
+                // .arg(session_dir_arg())
     )
+
+    .subcommand(
+      build_enable_disable_cli("toggle", "Toggle session visibility")
+        .help_short("Toggle session visibility")
+        .display_order(2)
+      // .arg(session_dir_arg())
+    )
+
 
     .subcommand(build_list_cli())
 }
@@ -68,7 +74,8 @@ pub fn build_cli() -> App<'static, 'static> {
 fn session_dir_arg() -> Arg<'static, 'static> {
   Arg::with_name("session-dir")
     .long("session-dir").short("d")
-    .value_name("XSESSION_DIR").takes_value(true)
+    .takes_value(true)
+    .value_name("session-dir")
     .default_value(get_default_session_dir())
     .help("Session config directory")
     .next_line_help(true)
@@ -84,7 +91,7 @@ fn build_list_cli() -> App<'static, 'static> {
     .long_about(HELP_TOP)
     .display_order(1)
 
-    .arg(session_dir_arg())
+    // .arg(session_dir_arg())
 
     .arg(Arg::with_name("comments")
       .short("c").long("comments")
@@ -114,7 +121,7 @@ fn build_list_cli() -> App<'static, 'static> {
 /// Generate the command line argument structure for enable/disable
 fn build_enable_disable_cli(name: &str, description: &'static str) -> App<'static, 'static> {
   SubCommand::with_name(name)
-    .about("Disable a session name")
+    .about(description)
     .setting(AppSettings::ColoredHelp)
     .arg(Arg::with_name("session_key")
       .required(true)

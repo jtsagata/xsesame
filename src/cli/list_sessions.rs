@@ -28,12 +28,17 @@ fn color_str(str: &str, acive: bool) -> String {
 
 /// List sessions action
 pub fn cmd_list_sessions(xsession_dir: &str, options: &ArgMatches) {
+  let sessions = get_sessions(&xsession_dir);
+  if sessions.is_empty() {
+    println!("The is no valid sessions on {}", xsession_dir);
+    return;
+  }
+
   let no_nls = !options.is_present("nls");
   let no_emoji = !options.is_present("emoji");
   let show_comments_opt = options.value_of("comments").unwrap();
   let show_comments = check_if_show_comments(show_comments_opt);
 
-  let sessions = get_sessions(&xsession_dir);
   let mut filter_sessions = SessionMap::new();
   sessions.into_iter()
     .filter(|(_, ses)| ses.is_valid())
