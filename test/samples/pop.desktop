@@ -7,3 +7,4 @@ Type=Application
 DesktopNames=pop:GNOME
 X-GDM-SessionRegisters=true
 X-Ubuntu-Gettext-Domain=gnome-session-3.0
+Hidden=true

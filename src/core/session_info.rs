@@ -125,7 +125,8 @@ impl SessionInfo {
   pub fn is_active(&self) -> bool {
     let path = Path::new(&self.path);
     let ext = path.extension().unwrap();
-    ext == "desktop"
+    let is_hidden = self.get_attribute_str("Hidden");
+    ext == "desktop" && is_hidden != "true"
   }
 }
 

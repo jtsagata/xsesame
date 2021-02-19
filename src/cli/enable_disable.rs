@@ -51,3 +51,4 @@ pub fn cmd_enable_disable(xsession_dir: &str, matches: &ArgMatches, ext: &str) {
     }
   }
 }
+
