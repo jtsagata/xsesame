@@ -16,6 +16,7 @@ impl Serialize for SessionInfo {
     state.serialize_field("comment-nls", self.get_comment(true).as_str())?;
     state.serialize_field("icon", self.icon().as_str())?;
     state.serialize_field("active", &self.is_active())?;
+    state.serialize_field("valid", &self.is_valid())?;
     state.end()
   }
 }
