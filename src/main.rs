@@ -5,14 +5,12 @@
 //!
 //! The propose of this little tool is to minimize the clutter in the display manager.
 //!
-
+//!
+//
 use std::path::Path;
 use std::process;
 
 use colored::*;
-
-use crate::cli::{cmd_completion, cmd_export_json, cmd_rerun_with_list_cmd, cmd_toggle};
-use crate::core::{get_sessions, SesOption};
 
 mod opts;
 mod core;
@@ -21,6 +19,11 @@ mod cli;
 
 #[cfg(target_os = "linux")]
 fn main() {
+  #[cfg(not(debug_assertions))]
+  setup_panic!();
+  #[cfg(debug_assertions)]
+    better_panic::install();
+
   let matches = opts::build_cli().get_matches();
 
   // Sessions directory
@@ -30,60 +33,84 @@ fn main() {
     process::exit(-1);
   }
 
-  let mut sub_command: bool = false;
-
-  // if let Some(matches) = matches.subcommand_matches("list") {
-  //   cmd_list_sessions(xsession_dir, matches);
-  //   sub_command = true;
-  // }
-  //
-  // if let Some(matches) = matches.subcommand_matches("enable") {
-  //   cmd_enable_disable(xsession_dir, matches, &"desktop");
-  //   sub_command = true;
-  // }
-
-  // TODO: Check must be on method
-  // if let Some(matches) = matches.subcommand_matches("disable") {
-  //   // check if there is at least 2 enabled sessions
-  //   let active_sessions = get_sessions(&xsession_dir,SesOption::All)
-  //     .values()
-  //     .filter(|el| el.is_active())
-  //     .count();
-  //
-  //   if active_sessions < 2 {
-  //     eprintln!("{}", "There is only one active session! Nothing to be done!".yellow());
-  //   } else {
-  //     cmd_enable_disable(xsession_dir, matches, &"desktop-disable");
-  //   }
-  //   sub_command = true;
-  // }
-
-  if let Some(matches) = matches.subcommand_matches("toggle") {
-    let key = matches.value_of("session_key").unwrap();
-    cmd_toggle(&key, &xsession_dir);
-    sub_command = true;
-  }
-
-
-  if let Some(matches) = matches.subcommand_matches("completion") {
-    cmd_completion(matches);
-    sub_command = true;
-  }
-
-  if let Some(_matches) = matches.subcommand_matches("export") {
-    let json = cmd_export_json(xsession_dir);
-    println!("{}", json);
-    sub_command = true;
-  }
-
-  // If no subcommand is given rerun with list option
-  if !sub_command {
-    match core::run_with_gui() {
-      true => { todo!() }
-      false => { cmd_rerun_with_list_cmd(xsession_dir) }
+  match matches.subcommand() {
+    ("list", opts) => {
+      cli::cmd::list(xsession_dir, opts);
+    }
+    ("enable", opts) => {
+      cli::cmd::enable(xsession_dir, opts);
+    }
+    ("disable", opts) => {
+      cli::cmd::list(xsession_dir, opts);
+    }
+    ("toggle", opts) => {
+      cli::cmd::toggle(xsession_dir, opts);
+    }
+    ("export", opts) => {
+      cli::cmd::export(xsession_dir, opts);
+    }
+    ("completion", opts) => {
+      cli::cmd::completion(xsession_dir, opts);
+    }
+    (_, _) => {
+      todo!("TODO: no sub command do list or gui");
     }
   }
+
+
+// if let Some(matches) = matches.subcommand_matches("list") {
+//   cmd_list_sessions(xsession_dir, matches);
+//   sub_command = true;
+// }
+//
+// if let Some(matches) = matches.subcommand_matches("enable") {
+//   cmd_enable_disable(xsession_dir, matches, &"desktop");
+//   sub_command = true;
+// }
+
+// TODO: Check must be on method
+// if let Some(matches) = matches.subcommand_matches("disable") {
+//   // check if there is at least 2 enabled sessions
+//   let active_sessions = get_sessions(&xsession_dir,SesOption::All)
+//     .values()
+//     .filter(|el| el.is_active())
+//     .count();
+//
+//   if active_sessions < 2 {
+//     eprintln!("{}", "There is only one active session! Nothing to be done!".yellow());
+//   } else {
+//     cmd_enable_disable(xsession_dir, matches, &"desktop-disable");
+//   }
+//   sub_command = true;
+// }
+
+//   if let Some(matches) = matches.subcommand_matches("toggle") {
+//     let key = matches.value_of("session_key").unwrap();
+//     cmd_toggle(&key, &xsession_dir);
+//     sub_command = true;
+//   }
+//
+//
+//   if let Some(matches) = matches.subcommand_matches("completion") {
+//     cmd_completion(matches);
+//     sub_command = true;
+//   }
+//
+//   if let Some(_matches) = matches.subcommand_matches("export") {
+//     let json = cmd_export_json(xsession_dir);
+//     println!("{}", json);
+//     sub_command = true;
+//   }
+//
+// // If no subcommand is given rerun with list option
+//   if !sub_command {
+//     match core::run_with_gui() {
+//       true => { todo!() }
+//       false => { cmd_rerun_with_list_cmd(xsession_dir) }
+//     }
+//   }
 }
+
 
 #[cfg(not(target_os = "linux"))]
 pub fn main() {
