@@ -3,7 +3,7 @@ use std::{io, process};
 use clap::{ArgMatches, Shell};
 use colored::Colorize;
 
-use crate::core::get_sessions;
+use crate::core::{get_sessions, SesOption};
 use crate::opts;
 
 /// Command line completion generation
@@ -42,6 +42,6 @@ pub fn cmd_rerun_with_list_cmd(xsession_dir: &str) {
 
 /// Export sessions as json
 pub fn cmd_export_json(xsession_dir: &str) -> String {
-  let sessions = get_sessions(&xsession_dir);
+  let sessions = get_sessions(&xsession_dir, SesOption::All);
   serde_json::to_string(&sessions).unwrap()
 }

@@ -1,132 +1,157 @@
+use std::io;
+use std::io::Error;
 use std::path::Path;
 
-use freedesktop_entry_parser::Entry;
+use freedesktop_entry_parser::{Entry, parse_entry};
 
-/// A path to a session file, and a parser to it
+use crate::core::utils::generate_path_key;
+use crate::core::VALID_TYPES;
+
 pub struct SessionInfo {
-  path: String,
-  desktop: freedesktop_entry_parser::Entry,
-  error: Option<String>,
+  key: String,
+  filename: String,
+  pub data: Result<freedesktop_entry_parser::Entry, io::Error>,
 }
 
+impl Clone for SessionInfo {
+  fn clone(&self) -> Self {
+    let f = self.filename();
+    SessionInfo::new(generate_path_key(&f), f.to_string(), parse_entry(f))
+  }
+}
+
+#[derive(Debug)]
+pub struct SessionError {
+  message: String,
+}
+
+impl SessionError {
+  pub fn new(message: String) -> Self {
+    SessionError { message }
+  }
+
+  pub fn message(&self) -> &str {
+    &self.message
+  }
+}
+
+
 impl SessionInfo {
-  /// Create a new DesktopInfo object and validate some basic properties
-  pub fn new(path: String, desktop: Entry) -> Self {
-    let error: Option<String> = None;
-    let mut entry = SessionInfo { path, desktop, error };
-    entry.validate_entry();
-    entry
+  pub fn new(key: String, filename: String, data: Result<Entry, Error>) -> Self {
+    SessionInfo { key, filename, data }
   }
 
-  /// Validates an entry
-  fn validate_entry(&mut self) {
-    let file = self.path();
-    let file = Path::new(&file).file_name();
-    let just_the_file = file.unwrap().to_string_lossy();
+  pub fn key(&self) -> &str {
+    &self.key
+  }
 
-    // Test Type="Application"
-    let d_type = self.get_attribute("Type");
-    let valid_session_types = vec!["XSession", "Application"];
-    match d_type {
-      None => {
-        self.error = Some(format!("The file '{}' does not specify a {}.", just_the_file, "Type"));
+  pub fn filename(&self) -> &str {
+    &self.filename
+  }
+
+  pub fn name(&self) -> Option<String> {
+    self.attr_with_nls("Name")
+  }
+
+  pub fn comment(&self) -> Option<String> {
+    self.attr_with_nls("Comment")
+  }
+
+
+  pub fn is_valid(&self) -> Result<(), SessionError> {
+    if !self.have_desktop_entry() {
+      return Err(SessionError::new("Can't parse".to_string()));
+    }
+    let section = self.data.as_ref().unwrap().section("Desktop Entry");
+
+    if section.has_attr("Type") {
+      let type_attr = section.attr("Type").unwrap();
+      if type_attr.is_empty() {
+        return Err(SessionError::new("Empty Type Attribute".to_string()));
       }
-      Some(d_type) => if !valid_session_types.contains(&d_type) {
-        self.error = Some(format!("The file '{}' specify Type as '{}'", just_the_file, d_type));
-      },
-    }
-
-    // Test if provides a Name
-    if self.get_attribute("Name").is_none() {
-      self.error = Some(format!("The file '{}' does not specify a Name.", just_the_file));
-    }
-  }
-
-
-  /// Export the path
-  pub fn path(&self) -> String {
-    self.path.to_string()
-  }
-
-  /// Get the path key from filename
-  pub fn get_path_key(&self) -> String {
-    let path = Path::new(&self.path).with_extension("");
-    let res = path.file_name().unwrap();
-    res.to_str().unwrap().to_string().to_lowercase()
-  }
-
-  /// Get the session name
-  pub fn get_name(&self) -> String {
-    self.get_attribute_str("Name")
-  }
-
-  /// Get the session icon (if any)
-  pub fn icon(&self) -> String {
-    self.get_attribute_str("Icon")
-  }
-
-  /// Get if valid
-  pub fn is_valid(&self) -> bool {
-    self.error.is_none()
-  }
-
-  /// handy function to get comment
-  pub fn get_comment(&self, with_nls: bool) -> String {
-    match with_nls {
-      false => { self.get_attribute_str("Comment") }
-      true => { self.comment_with_nls() }
-    }
-  }
-
-  /// Get the session comment in native language if available, fallbacks to English
-  fn comment_with_nls(&self) -> String {
-    let mut lang_env = std::env::var("LC_ALL");
-    if lang_env.is_err() {
-      lang_env = std::env::var("LANG");
-    }
-    return match lang_env {
-      Ok(lang_env) => {
-        let lang = env_lang::to_struct(&lang_env).unwrap().language.unwrap();
-        let localized = self.get_attribute_with_locale("Comment", lang);
-        match localized {
-          None => { self.get_attribute_str("Comment") }
-          Some(text) => { text }
-        }
+      if !VALID_TYPES.contains(&type_attr) {
+        return Err(SessionError::new("Invalid Type Attribute".to_string()));
       }
-      Err(_) => {
-        self.get_attribute_str("Comment")
-      }
-    };
-  }
-
-  /// Helper to get an attribute
-  fn get_attribute(&self, attr: &str) -> Option<&str> {
-    return self.desktop.section("Desktop Entry").attr(attr);
-  }
-
-  /// Helper to get an attribute localized
-  fn get_attribute_with_locale(&self, attr: &str, locale: &str) -> Option<String> {
-    let section = self.desktop.section("Desktop Entry");
-    let localized = section.attr_with_param(attr, locale);
-    match localized {
-      None => { None }
-      Some(txt) => {
-        Some(txt.to_string())
-      }
+    } else {
+      return Err(SessionError::new("No Type Attribute".to_string()));
     }
-  }
 
-  /// Helper to get an attribute as string
-  fn get_attribute_str(&self, attr: &str) -> String {
-    Option::or(self.get_attribute(&attr), Some("")).unwrap().to_string()
+    if section.has_attr("Exec") {
+      let exec = section.attr("Exec").unwrap();
+      if exec.is_empty() {
+        return Err(SessionError::new("Empty Exec Attribute".to_string()));
+      }
+    } else {
+      return Err(SessionError::new("No Exec Attribute".to_string()));
+    }
+
+    Ok(())
   }
 
   /// Get the session state (active/inactive) from filename
   pub fn is_active(&self) -> bool {
-    let path = Path::new(&self.path);
+    let path = Path::new(&self.filename);
     let ext = path.extension().unwrap();
-    let is_hidden = self.get_attribute_str("Hidden");
-    ext == "desktop" && is_hidden != "true"
+    let is_hidden = self.attr("Hidden");
+    let is_hidden = match is_hidden {
+      None => { false }
+      Some(attr) => { attr != "true" }
+    };
+    ext == "desktop" && is_hidden
+  }
+
+
+  pub fn have_desktop_entry(&self) -> bool {
+    self.data.is_ok() && self.data.as_ref().unwrap().has_section("Desktop Entry")
+  }
+
+  pub fn attr(&self, name: &str) -> Option<String> {
+    if !self.have_desktop_entry() {
+      return None;
+    }
+    let it = self.data.as_ref().unwrap().section("Desktop Entry");
+    if it.has_attr(name) {
+      Some(it.attr(name).unwrap().to_string())
+    } else {
+      None
+    }
+  }
+
+  pub fn attr_with_nls(&self, name: &str) -> Option<String> {
+    if !self.have_desktop_entry() {
+      return None;
+    }
+    let sel = self.data.as_ref().unwrap().section("Desktop Entry");
+    for locale in get_locales() {
+      if sel.has_attr_with_param(name, &locale) {
+        return Some(String::from(sel.attr_with_param(name, locale).unwrap()));
+      }
+    }
+    self.attr(name)
   }
 }
 
+
+/// Helper function to get user locales. Example:en-US,en
+fn get_locales() -> Vec<String> {
+  use itertools::Itertools;
+
+  let locales: Vec<String> = locale_config::Locale::current()
+    .tags_for("messages")
+    .map(|l| l.to_string()).collect();
+  let mut ret: Vec<String> = Vec::new();
+
+  // https://github.com/rust-locale/locale_config/issues/7
+  for l in locales {
+    let split: Vec<&str> = l.split('-').collect();
+    if split.len() > 1 {
+      let plain = split[0].to_string();
+      ret.push(l);
+      ret.push(plain);
+    } else {
+      ret.push(l);
+    }
+  }
+  // Remove duplicates
+  ret.into_iter().unique().collect()
+}

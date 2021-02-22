@@ -1,14 +1,19 @@
+use std::collections::BTreeMap;
 use std::env;
 
-pub use collect::get_sessions as get_sessions;
+pub use get_sessions::get_session_info as get_session_info;
+pub use get_sessions::get_sessions as get_sessions;
+pub use get_sessions::SesOption as SesOption;
 pub use session_info::SessionInfo as SessionInfo;
-pub use tools::get_filename_from_key as get_filename_from_key;
 pub use tools::program_name as program_name;
 
-mod collect;
+pub type SessionList = Vec<SessionInfo>;
+
+mod get_sessions;
 mod to_json;
 mod session_info;
 mod tools;
+mod utils;
 
 /// The default place of session data
 #[cfg(debug_assertions)]
@@ -20,6 +25,8 @@ pub const XSESSION_DIR: &str = "/usr/share/xsessions";
 pub fn get_default_session_dir() -> &'static str {
   XSESSION_DIR
 }
+
+const VALID_TYPES: [&str; 2] = ["XSession", "Application"];
 
 
 enum SessionKind {
