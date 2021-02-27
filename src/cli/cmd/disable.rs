@@ -1,5 +1,5 @@
 use clap::ArgMatches;
 
-pub fn disable(p0: &str, p1: Option<&ArgMatches>) {
-  unimplemented!()
+pub fn disable(_p0: &str, _p1: Option<&ArgMatches>) {
+  todo!("Implement DISABLE");
 }

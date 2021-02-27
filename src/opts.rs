@@ -31,6 +31,18 @@ pub fn build_cli() -> App<'static, 'static> {
         .setting(AppSettings::ColoredHelp)
         .after_help("For use with integration with guis")
         .display_order(4)
+        .arg(
+          Arg::with_name("what")
+            .long("what").short("w")
+            .takes_value(true)
+            .value_name("what")
+            .default_value("all")
+            .require_equals(true)
+            .possible_values(&["all", "valid", "invalid"])
+            .hide_default_value(true)
+            .help("filter results")
+            .next_line_help(true)
+        )
     )
 
     .subcommand(
@@ -38,32 +50,31 @@ pub fn build_cli() -> App<'static, 'static> {
         .about("Generate completions for various shells")
         .setting(AppSettings::ColoredHelp)
         .arg(Arg::with_name("shell")
-          .require_equals(true)
+          .long("shell").short("s")
           .possible_values(&["bash", "zsh", "fish", "elvish"])
           .default_value("bash")
           .takes_value(true).value_name("shell")
+          .require_equals(true)
           .hide_default_value(true)
           .help("shell to generate completions")
+          .next_line_help(true)
         )
     )
 
     .subcommand(build_enable_disable_cli(
       "enable", "Enable a session")
-                  .display_order(3)
-                // .arg(session_dir_arg())
+      .display_order(3)
     )
 
-    .subcommand(build_enable_disable_cli(
-      "disable", "Disable a session")
-                  .display_order(4)
-                // .arg(session_dir_arg())
+    .subcommand(
+      build_enable_disable_cli("disable", "Disable a session")
+        .display_order(4)
     )
 
     .subcommand(
       build_enable_disable_cli("toggle", "Toggle session visibility")
         .help_short("Toggle session visibility")
         .display_order(2)
-      // .arg(session_dir_arg())
     )
 
 

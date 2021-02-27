@@ -1,5 +1,5 @@
 use clap::ArgMatches;
 
-pub fn list(p0: &str, p1: Option<&ArgMatches>) {
-  unimplemented!()
+pub fn list(_p0: &str, _p1: Option<&ArgMatches>) {
+  todo!("Implement LIST");
 }

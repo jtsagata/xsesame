@@ -1,8 +1,4 @@
-use std::path::{Path, PathBuf};
-
-use colored::*;
-
-use crate::core::get_sessions;
+use std::path::Path;
 
 /// Helper to get the executable name without the path
 pub fn program_name() -> Option<String> {

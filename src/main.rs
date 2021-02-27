@@ -91,16 +91,6 @@ fn main() {
 //   }
 //
 //
-//   if let Some(matches) = matches.subcommand_matches("completion") {
-//     cmd_completion(matches);
-//     sub_command = true;
-//   }
-//
-//   if let Some(_matches) = matches.subcommand_matches("export") {
-//     let json = cmd_export_json(xsession_dir);
-//     println!("{}", json);
-//     sub_command = true;
-//   }
 //
 // // If no subcommand is given rerun with list option
 //   if !sub_command {

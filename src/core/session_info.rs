@@ -3,6 +3,8 @@ use std::io::Error;
 use std::path::Path;
 
 use freedesktop_entry_parser::{Entry, parse_entry};
+use serde::{Serialize, Serializer};
+use serde::ser::SerializeStruct;
 
 use crate::core::utils::generate_path_key;
 use crate::core::VALID_TYPES;
@@ -131,6 +133,22 @@ impl SessionInfo {
   }
 }
 
+/// Serializer for DesktopInfo
+impl Serialize for SessionInfo {
+  fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where S: Serializer,
+  {
+    let mut state = serializer.serialize_struct("Session", 7)?;
+    state.serialize_field("key", self.key())?;
+    state.serialize_field("path", self.filename())?;
+    state.serialize_field("name", &self.name().unwrap_or_default())?;
+    state.serialize_field("comment", &self.comment().unwrap_or_default())?;
+    state.serialize_field("icon", &self.attr("Icon").unwrap_or_default())?;
+    state.serialize_field("active", &self.is_active())?;
+    state.serialize_field("valid", &self.is_valid().is_ok())?;
+    state.end()
+  }
+}
 
 /// Helper function to get user locales. Example:en-US,en
 fn get_locales() -> Vec<String> {
@@ -155,3 +173,4 @@ fn get_locales() -> Vec<String> {
   // Remove duplicates
   ret.into_iter().unique().collect()
 }
+
