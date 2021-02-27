@@ -12,9 +12,11 @@ use std::process;
 
 use colored::*;
 
-mod opts;
+use crate::cli::run_with_gui;
+
 mod core;
 mod cli;
+mod cmdline_opts;
 
 
 #[cfg(target_os = "linux")]
@@ -24,7 +26,7 @@ fn main() {
   #[cfg(debug_assertions)]
     better_panic::install();
 
-  let matches = opts::build_cli().get_matches();
+  let matches = cmdline_opts::build_cli().get_matches();
 
   // Sessions directory
   let xsession_dir = matches.value_of("session-dir").unwrap();
@@ -41,7 +43,7 @@ fn main() {
       cli::cmd::enable(xsession_dir, opts);
     }
     ("disable", opts) => {
-      cli::cmd::list(xsession_dir, opts);
+      cli::cmd::disable(xsession_dir, opts);
     }
     ("toggle", opts) => {
       cli::cmd::toggle(xsession_dir, opts);
@@ -52,53 +54,15 @@ fn main() {
     ("completion", opts) => {
       cli::cmd::completion(xsession_dir, opts);
     }
-    (_, _) => {
-      todo!("TODO: no sub command do list or gui");
+    (_, opts) => {
+      match run_with_gui() {
+        true => { todo!("TODO: gui"); }
+        false => {
+          cli::cmd::list(xsession_dir, opts);
+        }
+      }
     }
   }
-
-
-// if let Some(matches) = matches.subcommand_matches("list") {
-//   cmd_list_sessions(xsession_dir, matches);
-//   sub_command = true;
-// }
-//
-// if let Some(matches) = matches.subcommand_matches("enable") {
-//   cmd_enable_disable(xsession_dir, matches, &"desktop");
-//   sub_command = true;
-// }
-
-// TODO: Check must be on method
-// if let Some(matches) = matches.subcommand_matches("disable") {
-//   // check if there is at least 2 enabled sessions
-//   let active_sessions = get_sessions(&xsession_dir,SesOption::All)
-//     .values()
-//     .filter(|el| el.is_active())
-//     .count();
-//
-//   if active_sessions < 2 {
-//     eprintln!("{}", "There is only one active session! Nothing to be done!".yellow());
-//   } else {
-//     cmd_enable_disable(xsession_dir, matches, &"desktop-disable");
-//   }
-//   sub_command = true;
-// }
-
-//   if let Some(matches) = matches.subcommand_matches("toggle") {
-//     let key = matches.value_of("session_key").unwrap();
-//     cmd_toggle(&key, &xsession_dir);
-//     sub_command = true;
-//   }
-//
-//
-//
-// // If no subcommand is given rerun with list option
-//   if !sub_command {
-//     match core::run_with_gui() {
-//       true => { todo!() }
-//       false => { cmd_rerun_with_list_cmd(xsession_dir) }
-//     }
-//   }
 }
 
 

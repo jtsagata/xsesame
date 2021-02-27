@@ -7,4 +7,4 @@ Icon=
 Type=Application
 X-Ubuntu-Gettext-Domain=cinnamon
 X-GNOME-Provides=cinnamon2d
-
+Hidden=true

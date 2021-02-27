@@ -12,15 +12,6 @@ pub enum SesOption {
   Invalid,
 }
 
-pub fn get_session_info<'a>(sessions: &'a [SessionInfo], key: &str) -> Option<&'a SessionInfo> {
-  for s in sessions {
-    if s.key() == key {
-      return Some(s);
-    }
-  }
-  None
-}
-
 pub fn get_sessions(xsession_dir: &str, what: SesOption) -> SessionList {
   // Client must assure that xsession_dir exists, or panic!
   use regex::Regex;

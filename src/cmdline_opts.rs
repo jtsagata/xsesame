@@ -31,18 +31,7 @@ pub fn build_cli() -> App<'static, 'static> {
         .setting(AppSettings::ColoredHelp)
         .after_help("For use with integration with guis")
         .display_order(4)
-        .arg(
-          Arg::with_name("what")
-            .long("what").short("w")
-            .takes_value(true)
-            .value_name("what")
-            .default_value("all")
-            .require_equals(true)
-            .possible_values(&["all", "valid", "invalid"])
-            .hide_default_value(true)
-            .help("filter results")
-            .next_line_help(true)
-        )
+        .arg(what_arg())
     )
 
     .subcommand(
@@ -93,6 +82,20 @@ fn session_dir_arg() -> Arg<'static, 'static> {
     .display_order(1)
 }
 
+// Generate '--what' argument
+fn what_arg() -> Arg<'static, 'static> {
+  Arg::with_name("what")
+    .long("what").short("w")
+    .takes_value(true)
+    .value_name("what")
+    .default_value("valid")
+    .require_equals(true)
+    .possible_values(&["all", "valid", "invalid"])
+    .hide_default_value(true)
+    .help("filter results")
+    .next_line_help(true)
+}
+
 
 /// Generate the command line argument structure for list
 fn build_list_cli() -> App<'static, 'static> {
@@ -103,6 +106,7 @@ fn build_list_cli() -> App<'static, 'static> {
     .display_order(1)
 
     // .arg(session_dir_arg())
+    .arg(what_arg())
 
     .arg(Arg::with_name("comments")
       .short("c").long("comments")
@@ -117,8 +121,13 @@ fn build_list_cli() -> App<'static, 'static> {
 
 
     .arg(Arg::with_name("emoji")
-      .long("no-emoji").short("e")
-      .help("Nice active/inactive symbols")
+      .long("emoji").short("e")
+      .takes_value(true).value_name("emoji")
+      .default_value("hearts")
+      .possible_values(&["hearts", "check", "plain"])
+      .require_equals(true)
+      .hide_default_value(true)
+      .help("Use emoji")
       .display_order(2)
     )
 

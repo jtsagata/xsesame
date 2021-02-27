@@ -220,9 +220,15 @@ version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "886b70328cba8871bfc025858e1de4be16b1d5088f2ba50b57816f4210672615"
 dependencies = [
- "errno",
- "libc",
+  "errno",
+  "libc",
 ]
+
+[[package]]
+name = "figures-rs"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f52f58064b067e2965dd6f10fd34f228048759cbad7b515208e9d78b55158a4c"
 
 [[package]]
 name = "foreign-types"
@@ -230,8 +236,8 @@ version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d737d9aa519fb7b749cbc3b962edcf310a8dd1f4b67c91c4f83975dbdd17d965"
 dependencies = [
- "foreign-types-macros",
- "foreign-types-shared",
+  "foreign-types-macros",
+  "foreign-types-shared",
 ]
 
 [[package]]
@@ -684,6 +690,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "unicode-segmentation"
+version = "1.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bb0d2e7be6ae3a5fa87eed5fb451aff96f2573d2694942e40543ae0bbe19c796"
+
+[[package]]
 name = "unicode-width"
 version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -763,10 +775,12 @@ checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 name = "xsesame"
 version = "0.1.0"
 dependencies = [
+  "atty",
   "better-panic",
   "clap",
   "colored",
   "exec",
+  "figures-rs",
   "freedesktop_entry_parser",
   "human-panic",
   "itertools",
@@ -778,4 +792,5 @@ dependencies = [
   "serde_json",
   "systemd",
   "terminal_size",
+  "unicode-segmentation",
 ]

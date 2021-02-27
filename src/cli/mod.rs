@@ -3,10 +3,8 @@
 // pub use commands::cmd_rerun_with_list_cmd as cmd_rerun_with_list_cmd;
 // pub use toggle::cmd_toggle as cmd_toggle;
 
-mod commands;
-mod enable_disable;
-mod list_sessions;
-mod toggle;
+pub use utils::run_with_gui as run_with_gui;
+
 mod utils;
 pub mod cmd;
 

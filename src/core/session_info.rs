@@ -27,6 +27,14 @@ pub struct SessionError {
   message: String,
 }
 
+#[derive(Debug)]
+pub enum SessionType {
+  Active,
+  Inactive,
+  Invalid,
+}
+
+
 impl SessionError {
   pub fn new(message: String) -> Self {
     SessionError { message }
@@ -59,6 +67,17 @@ impl SessionInfo {
     self.attr_with_nls("Comment")
   }
 
+  pub fn state(&self) -> SessionType {
+    if self.is_valid().is_ok() {
+      if self.is_active() {
+        SessionType::Active
+      } else {
+        SessionType::Inactive
+      }
+    } else {
+      SessionType::Invalid
+    }
+  }
 
   pub fn is_valid(&self) -> Result<(), SessionError> {
     if !self.have_desktop_entry() {
@@ -97,7 +116,7 @@ impl SessionInfo {
     let is_hidden = self.attr("Hidden");
     let is_hidden = match is_hidden {
       None => { false }
-      Some(attr) => { attr != "true" }
+      Some(attr) => { attr == "true" }
     };
     ext == "desktop" && is_hidden
   }
