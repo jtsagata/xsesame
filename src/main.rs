@@ -57,7 +57,11 @@ fn main() {
     }
     (_, opts) => {
       match run_with_gui() {
-        true => { todo!("TODO: gui"); }
+        true => {
+          // cli::cmd::list(xsession_dir, opts);
+          // todo!("TODO: gui");
+          cmd_rerun_with_list_cmd(xsession_dir)
+        }
         false => {
           cli::cmd::list(xsession_dir, opts);
         }
@@ -67,6 +71,27 @@ fn main() {
   process::exit(SUCCESS);
 }
 
+
+/// Rerun current executable using list subcommand
+///
+/// As clap crate can't support a default subcommand yet, we hack it with execve()
+fn cmd_rerun_with_list_cmd(xsession_dir: &str) {
+  use exec::Error;
+  use std::ffi::OsStr;
+
+  let exe = std::env::current_exe().unwrap().display().to_string();
+  let err = exec::Command::new(OsStr::new(&exe))
+    .arg("--session-dir")
+    .arg(xsession_dir)
+    .arg("list").exec();
+  match err {
+    Error::BadArgument(_) => {}
+    Error::Errno(errno) => {
+      eprintln!("{} {}", "Error:".red(), err);
+      process::exit(errno.0);
+    }
+  }
+}
 
 #[cfg(not(target_os = "linux"))]
 pub fn main() {
