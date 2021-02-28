@@ -13,6 +13,7 @@ use std::path::Path;
 use std::process;
 
 use colored::*;
+use exec::Error;
 use exit_code::{OS_FILE_ERROR, SUCCESS};
 #[cfg(not(debug_assertions))]
 use human_panic::setup_panic;
@@ -79,7 +80,6 @@ fn main() {
 ///
 /// As clap crate can't support a default subcommand yet, we hack it with execve()
 fn cmd_rerun_with_list_cmd(xsession_dir: &str) {
-  use exec::Error;
   use std::ffi::OsStr;
 
   let exe = std::env::current_exe().unwrap().display().to_string();
@@ -89,9 +89,9 @@ fn cmd_rerun_with_list_cmd(xsession_dir: &str) {
     .arg("list").exec();
   match err {
     Error::BadArgument(_) => {}
-    Error::Errno(errno) => {
+    Error::Errno(err) => {
       eprintln!("{} {}", "Error:".red(), err);
-      process::exit(errno.0);
+      process::exit(exit_code::FAILURE);
     }
   }
 }

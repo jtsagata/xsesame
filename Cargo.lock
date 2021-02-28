@@ -101,12 +101,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6cf89846ef2b2674ef1c153256cec98fba587c72bf4ea2c4b2f6d91a19f55926"
 
 [[package]]
-name = "cc"
-version = "1.0.67"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3c69b077ad434294d3ce9f1f6143a2a4b89a8a2d54ef813d85003a4fd1137fd"
-
-[[package]]
 name = "cfg-if"
 version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -419,18 +413,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "nix"
-version = "0.19.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2ccba0cfe4fdf15982d1674c69b1fd80bad427d293849982668dfe454bd61f2"
-dependencies = [
- "bitflags",
- "cc",
- "cfg-if 1.0.0",
- "libc",
-]
-
-[[package]]
 name = "nom"
 version = "5.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -489,15 +471,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7edc011af0ae98b7f88cf7e4a83b70a54a75d2b8cb013d6efd02e5956207e9eb"
 dependencies = [
   "regex",
-]
-
-[[package]]
-name = "pad"
-version = "0.1.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d2ad9b889f1b12e0b9ee24db044b5129150d5eada288edc800f789928dc8c0e3"
-dependencies = [
-  "unicode-width",
 ]
 
 [[package]]
@@ -792,8 +765,6 @@ dependencies = [
   "human-panic",
   "itertools",
   "locale_config",
-  "nix",
-  "pad",
   "regex",
   "serde",
   "serde_json",
