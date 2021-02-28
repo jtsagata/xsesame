@@ -6,19 +6,22 @@
 //! The propose of this little tool is to minimize the clutter in the display manager.
 //!
 //!
-//
+
+#![warn(unused_extern_crates)]
+
 use std::path::Path;
 use std::process;
 
 use colored::*;
 use exit_code::{OS_FILE_ERROR, SUCCESS};
+#[cfg(not(debug_assertions))]
+use human_panic::setup_panic;
 
 use crate::cli::run_with_gui;
 
 mod core;
 mod cli;
 mod cmdline_opts;
-
 
 #[cfg(target_os = "linux")]
 fn main() {
