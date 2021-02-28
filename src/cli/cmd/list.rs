@@ -7,15 +7,15 @@ use terminal_size::{terminal_size, Width};
 
 use crate::core::{get_sessions, SessionInfo, SessionType};
 
-pub fn list(xsessions_dir: &str, options: Option<&ArgMatches>) {
+pub fn list(xsession_dir: &str, options: Option<&ArgMatches>) {
   use crate::cli::cmd::parse_what_opt;
 
   let options = options.unwrap();
   let what = parse_what_opt(&options);
 
-  let sessions = get_sessions(&xsessions_dir, what);
+  let sessions = get_sessions(&xsession_dir, what);
   if sessions.is_empty() {
-    println!("The is no valid sessions on '{}' directory", xsessions_dir);
+    println!("The is no valid sessions on '{}' directory", xsession_dir);
     return;
   }
 

@@ -11,6 +11,7 @@ use std::path::Path;
 use std::process;
 
 use colored::*;
+use exit_code::{OS_FILE_ERROR, SUCCESS};
 
 use crate::cli::run_with_gui;
 
@@ -32,7 +33,7 @@ fn main() {
   let xsession_dir = matches.value_of("session-dir").unwrap();
   if !Path::new(xsession_dir).is_dir() {
     eprintln!("{} '{}' is not a directory", "Error:".red(), xsession_dir.green());
-    process::exit(-1);
+    process::exit(OS_FILE_ERROR);
   }
 
   match matches.subcommand() {
@@ -63,6 +64,7 @@ fn main() {
       }
     }
   }
+  process::exit(SUCCESS);
 }
 
 

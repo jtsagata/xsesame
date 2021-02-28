@@ -1,8 +1,8 @@
 [Desktop Entry]
+Icon=
+Exec=cinnamon-session-cinnamon
+Type=Application
 Name=Cinnamon
 Comment=This session logs you into Cinnamon
-Exec=cinnamon-session-cinnamon
+Hidden=false
 TryExec=/usr/bin/cinnamon
-Icon=
-Type=Application
-

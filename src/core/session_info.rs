@@ -106,6 +106,15 @@ impl SessionInfo {
       return Err(SessionError::new("No Exec Attribute".to_string()));
     }
 
+    if section.has_attr("Name") {
+      let exec = section.attr("Name").unwrap();
+      if exec.is_empty() {
+        return Err(SessionError::new("Empty Name Attribute".to_string()));
+      }
+    } else {
+      return Err(SessionError::new("No Name Attribute".to_string()));
+    }
+
     Ok(())
   }
 
@@ -118,7 +127,7 @@ impl SessionInfo {
       None => { false }
       Some(attr) => { attr == "true" }
     };
-    ext == "desktop" && is_hidden
+    ext == "desktop" && !is_hidden
   }
 
 
