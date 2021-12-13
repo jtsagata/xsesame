@@ -1,4 +1,4 @@
-# xsessame
+# xsesame
 
 Some desktop environments install a lot of different types that have to real use for
 the end user. For example cinnamon also install a cinnamon fallback. Others install a lot more.
